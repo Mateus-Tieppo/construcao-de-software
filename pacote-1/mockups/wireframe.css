@@ -1,0 +1,54 @@
+/* Wireframes PulsePass — fidelidade média (tons de cinza + 1 cor de destaque) */
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.4 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #222; background: #e9e9ee; }
+.frame { width: 1100px; height: 720px; margin: 0 auto; background: #fff; border: 2px solid #555; display: flex; flex-direction: column; overflow: hidden; }
+.top { display: flex; align-items: center; gap: 16px; padding: 10px 18px; border-bottom: 2px solid #333; background: #f4f4f6; }
+.logo { font-weight: 800; font-size: 18px; letter-spacing: .5px; }
+.logo b { color: #6b3df5; }
+.top .sp { flex: 1; }
+.pill { border: 1.5px solid #555; border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+.role { background: #6b3df5; color: #fff; border-color: #6b3df5; }
+.body { flex: 1; display: flex; min-height: 0; }
+.side { width: 200px; border-right: 2px solid #ccc; padding: 14px; background: #fafafa; }
+.side div { padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; }
+.side .on { background: #e3dcff; font-weight: 600; }
+.main { flex: 1; padding: 18px 22px; overflow: hidden; }
+h1 { font-size: 20px; margin: 0 0 12px; }
+h2 { font-size: 15px; margin: 14px 0 8px; }
+.row { display: flex; gap: 14px; }
+.col { flex: 1; }
+.box { border: 1.5px solid #888; border-radius: 8px; padding: 12px; }
+.img { background: repeating-linear-gradient(45deg,#ddd,#ddd 8px,#eee 8px,#eee 16px); border: 1.5px solid #999; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #777; font-size: 12px; }
+.btn { display: inline-block; border: 2px solid #333; border-radius: 6px; padding: 7px 14px; font-weight: 600; background: #fff; }
+.btn.pri { background: #6b3df5; border-color: #6b3df5; color: #fff; }
+.btn.dis { opacity: .4; }
+.input { border: 1.5px solid #888; border-radius: 5px; padding: 7px 10px; color: #888; background: #fff; margin-bottom: 8px; }
+.muted { color: #777; font-size: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { border-bottom: 1px solid #ccc; padding: 7px 6px; text-align: left; }
+th { background: #f1f1f4; }
+.tag { font-size: 11px; border: 1px solid #555; border-radius: 4px; padding: 1px 6px; }
+.ok { background: #d8f5df; border-color: #2e8b57; }
+.warn { background: #fff1c9; border-color: #b8860b; }
+.bad { background: #fbd9d9; border-color: #b22222; }
+.timer { font-size: 22px; font-weight: 800; color: #b22222; }
+.note { position: absolute; background: #fff7b0; border: 1px solid #c9b200; padding: 4px 8px; font-size: 11px; border-radius: 4px; box-shadow: 1px 1px 0 #c9b200; max-width: 220px; }
+.rel { position: relative; }
+.seats { display: grid; grid-template-columns: repeat(16, 22px); gap: 5px; }
+.seat { width: 22px; height: 20px; border: 1.5px solid #555; border-radius: 4px 4px 2px 2px; }
+.s-free { background: #fff; }
+.s-res { background: #ffd27a; }
+.s-sold { background: #999; }
+.s-sel { background: #6b3df5; border-color: #6b3df5; }
+.stage { text-align: center; border: 2px solid #333; border-radius: 0 0 40px 40px; padding: 6px; width: 380px; margin: 0 auto 14px; font-weight: 700; }
+.kpi { border: 1.5px solid #888; border-radius: 8px; padding: 10px; flex: 1; }
+.kpi b { display: block; font-size: 22px; }
+.chart { height: 120px; border: 1.5px solid #888; border-radius: 8px; display: flex; align-items: flex-end; gap: 6px; padding: 10px; }
+.chart i { flex: 1; background: #b9a7ff; border: 1px solid #6b3df5; }
+.qr { width: 120px; height: 120px; background:
+  linear-gradient(90deg,#222 10%,transparent 10% 20%,#222 20% 30%,transparent 30% 50%,#222 50% 60%,transparent 60% 70%,#222 70% 80%,transparent 80% 90%,#222 90%),
+  linear-gradient(#222 10%,transparent 10% 30%,#222 30% 40%,transparent 40% 60%,#222 60% 70%,transparent 70% 90%,#222 90%);
+  background-blend-mode: difference; border: 6px solid #fff; outline: 2px solid #222; }
+.cam { width: 360px; height: 300px; background: #333; border-radius: 10px; position: relative; margin: 0 auto; }
+.cam:after { content: ""; position: absolute; inset: 60px 90px; border: 4px dashed #fff; border-radius: 8px; }
+.result { border-radius: 10px; padding: 18px; text-align: center; font-size: 20px; font-weight: 800; }
