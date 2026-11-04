@@ -1,0 +1,22 @@
+{
+  "eventId": "0193f6a8-0000-7000-8000-000000000102",
+  "tipo": "ReservaExpirada",
+  "schemaVersion": 1,
+  "ocorridoEm": "2026-11-04T23:10:01.120Z",
+  "produtor": "inventory-service",
+  "agregadoId": "0193f6a0-2c4d-7e8f-9a01-b2c3d4e5f607",
+  "agregadoVersao": 2,
+  "correlationId": "0193f6a0-11aa-7d2e-8b55-0f3c2a9e4d71",
+  "causationId": "0193f6a0-2c4e-7000-8000-000000000101",
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+  "dados": {
+    "reservaId": "0193f6a0-2c4d-7e8f-9a01-b2c3d4e5f607",
+    "pedidoId": "0193f6a0-11aa-7d2e-8b55-0f3c2a9e4d71",
+    "eventoId": "0193e0aa-0000-7000-8000-000000000001",
+    "assentoIds": [
+      "0193e0ab-0000-7000-8000-0000000000a1"
+    ],
+    "expiraEm": "2026-11-04T23:10:00.000Z",
+    "expiradaEm": "2026-11-04T23:10:01.120Z"
+  }
+}
