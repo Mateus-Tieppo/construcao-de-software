@@ -1,7 +1,7 @@
 # 4. Descrição Esquemática da Pipeline de Desenvolvimento
 
 > Versão 1.0 · 04/11/2026 · Grupo 9 · Será atualizado nos Pacotes 3 e 4.
-> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Proposta para revisão do grupo]**.
+> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Decisão do grupo, Pacote 2]** (escolha nova, aprovada pelo grupo em 04/11/2026 com os ADRs) · **[Proposta para revisão do grupo]** (detalhe ainda não revisado pelo grupo).
 > **Estado real em 04/11/2026:** o repositório tem só documentação. Não existem ainda código dos serviços, `docker-compose.yml`, `.github/workflows/` nem branch `develop`. Tudo neste documento que fala em executar é **planejado**; os comandos aparecem como **comandos previstos**, não como resultados.
 
 ## 4.1 Exigência e escopo
@@ -46,7 +46,7 @@ flowchart TB
 
 *Figura 22. Pipeline de desenvolvimento. Roxo: portões humanos. Verde: etapas automatizadas.*
 
-O merge de um PR em `develop` não é um evento próprio do GitHub Actions: ele gera um evento `push` em `develop`. Por isso o workflow usa os gatilhos `pull_request` (destinos `develop` e `main`) e `push` (branch `develop`) **[Proposta para revisão do grupo]** (ADR-006).
+O merge de um PR em `develop` não é um evento próprio do GitHub Actions: ele gera um evento `push` em `develop`. Por isso o workflow usa os gatilhos `pull_request` (destinos `develop` e `main`) e `push` (branch `develop`) **[Decisão do grupo, Pacote 2]** (ADR-006).
 
 ## 4.3 Jobs da CI
 

@@ -1,7 +1,7 @@
 # 1. Descrição da Arquitetura no Modelo C4
 
 > Versão 1.0 · 04/11/2026 · Grupo 9 · Será atualizado nos Pacotes 3 e 4.
-> Rótulos: **[Enunciado]** exigência do professor · **[Decisão do grupo, Pacote 1]** escolha já registrada · **[Proposta para revisão do grupo]** escolha nova deste pacote. As decisões novas estão detalhadas nos ADRs de `pacote-2/adr/`.
+> Rótulos: **[Enunciado]** exigência do professor · **[Decisão do grupo, Pacote 1]** escolha já registrada · **[Decisão do grupo, Pacote 2]** escolha nova deste pacote, aprovada pelo grupo em 04/11/2026 com os ADRs · **[Proposta para revisão do grupo]** detalhe ainda não revisado pelo grupo. As decisões novas estão detalhadas nos ADRs de `pacote-2/adr/`.
 > Este documento descreve a arquitetura **planejada**. Nenhum serviço foi implementado até esta entrega.
 
 ## 1.1 Objetivo e leitura dos diagramas
@@ -175,14 +175,14 @@ flowchart LR
 |---|---|---|---|---|---|
 | SPA Web | Todos (front-end) | React + TS (Vite), servida por Nginx | Telas dos 4 perfis (Pacote 1, item 5); guarda só o access token em memória | Nenhum persistente | [Decisão do grupo, Pacote 1 (P02)] |
 | API Gateway | Transversal | Spring Cloud Gateway | Ponto único de entrada HTTP; valida JWT; consulta lista de revogação; *rate limiting* por usuário/IP (RNF11); propaga `traceparent` | Contadores no Redis | [Decisão do grupo, Pacote 1] |
-| IAM Service | 1. Identidade e Governança | Spring Boot 3, Java 21 | BFF de autenticação (login, refresh, logout), solicitação e aprovação de organizadores, gestão de papéis via Admin API do Keycloak, trilha de auditoria | Banco `iam`; sessões no Redis | [Proposta para revisão do grupo] (ADR-004) |
+| IAM Service | 1. Identidade e Governança | Spring Boot 3, Java 21 | BFF de autenticação (login, refresh, logout), solicitação e aprovação de organizadores, gestão de papéis via Admin API do Keycloak, trilha de auditoria | Banco `iam`; sessões no Redis | [Decisão do grupo, Pacote 2] (ADR-004) |
 | Inventory Service | 2. Inventário e Concorrência | Spring Boot 3 | Eventos, setores, lotes, assentos, catálogo de alta leitura, reserva atômica, confirmação, devolução e expiração | Banco `inv`; cache no Redis | [Enunciado] + ADR-002 |
 | Checkout Service | 3. Transações e Checkout | Spring Boot 3, Resilience4j | Pedido e FSM, Idempotency-Key, integração com simulador, Outbox, reconciliação | Banco `chk` | [Enunciado] + ADR-003 |
 | Ticket Service | 4. Mensageria e Despacho | Spring Boot 3, OpenPDF, ZXing | Consome pagamentos, emite ingressos (PDF + QR assinado), envia e-mail, valida check-in | Banco `tkt`; volume de PDFs | [Enunciado] |
-| Realtime Service | 4. Mensageria e Despacho | Spring Boot 3, STOMP | Mantém conexões WebSocket e empurra mudanças de assentos, pedidos e ingressos | Nenhum persistente | [Proposta para revisão do grupo] (ADR-001) |
+| Realtime Service | 4. Mensageria e Despacho | Spring Boot 3, STOMP | Mantém conexões WebSocket e empurra mudanças de assentos, pedidos e ingressos | Nenhum persistente | [Decisão do grupo, Pacote 2] (ADR-001) |
 | Telemetry Service | 5. Telemetria e DevOps | Spring Boot 3, Micrometer | Recebe eventos de navegação da SPA, consome eventos de domínio, agrega funil e vendas, expõe métricas de negócio | Banco `tel` | [Enunciado] |
 | PostgreSQL | Infra | PostgreSQL 16 | Fonte da verdade de cada serviço, Outbox e Inbox | 5 bancos + banco `keycloak` | [Decisão do grupo, Pacote 1 (P03)] |
-| Redis | Infra | Redis 7 (AOF ligado) | Sessões de refresh (cifradas), cache, *rate limit*, lista de revogação. **Não decide posse de assento** | Dados reconstruíveis, exceto sessões | [Proposta para revisão do grupo] (ADR-002, ADR-004) |
+| Redis | Infra | Redis 7 (AOF ligado) | Sessões de refresh (cifradas), cache, *rate limit*, lista de revogação. **Não decide posse de assento** | Dados reconstruíveis, exceto sessões | [Decisão do grupo, Pacote 2] (ADR-002, ADR-004) |
 | Cluster Kafka | Infra | Apache Kafka 3.8 (KRaft) | Streaming de eventos de domínio. No Compose local o cluster tem 1 nó; o desenho de tópicos e produtores vale para 3 nós sem mudança de código (documento 3, seção 3.2) | Tópicos (documento 3) | [Enunciado] |
 | Kafka UI | Infra | kafbat/kafka-ui | Inspeção de tópicos, grupos, lag e DLQ | Nenhum | [Decisão do grupo, Pacote 1 (P04)] |
 | Simulador de gateway | Externo | Spring Boot (código do grupo) | Autorizar, capturar, cancelar; modos de falha e atraso configuráveis | Banco em memória | [Decisão do grupo, Pacote 1 (P06)] |

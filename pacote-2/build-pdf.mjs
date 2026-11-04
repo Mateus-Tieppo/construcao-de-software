@@ -88,7 +88,7 @@ code { font-size: 8.6pt; } .rel { font-style: italic; }
 <li>Descrição da estrutura de mensageria do Kafka</li>
 <li>Descrição esquemática da Pipeline de desenvolvimento</li>
 <li>Descrição do Processo de GCS</li></ol>
-<p><b>Convenção de rótulos.</b> <b>[Enunciado]</b> marca exigência do professor; <b>[Decisão do grupo, Pacote 1]</b> marca escolha já registrada no Pacote 1; <b>[Proposta para revisão do grupo]</b> marca escolha nova deste pacote, ainda não aprovada pelo grupo.</p>
+<p><b>Convenção de rótulos.</b> <b>[Enunciado]</b> marca exigência do professor; <b>[Decisão do grupo, Pacote 1]</b> marca escolha já registrada no Pacote 1; <b>[Decisão do grupo, Pacote 2]</b> marca escolha nova deste pacote, aprovada pelo grupo em 04/11/2026 junto com os ADRs; <b>[Proposta para revisão do grupo]</b> marca detalhe ainda não revisado pelo grupo.</p>
 <p>Os ADRs, os contratos de eventos de exemplo e a auditoria de verificação deste pacote estão no repositório, em <code>pacote-2/adr/</code>, <code>pacote-2/contratos/</code> e <code>pacote-2/06-verificacao-entrega.md</code>. Nenhum código de aplicação foi implementado neste pacote; tudo o que descreve execução é planejado.</p></div>
 ${body}
 <script>${mermaidJs}</script>

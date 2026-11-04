@@ -1,11 +1,11 @@
 # ADR-004: Integração IAM, Keycloak e refresh tokens no Redis
 
-**Estado:** Proposta para revisão do grupo · pendente de spike técnico · 04/11/2026
+**Estado:** Aceita pelo grupo em 04/11/2026 · spike técnico pendente no início do Pacote 3
 
 ## Contexto
 O enunciado pede "autenticação stateless via JWT com refresh tokens em chave-valor" e um provedor como Keycloak. O Keycloak **não** guarda sessões no Redis por padrão: ele usa banco próprio e cache Infinispan. O RNF19 do Pacote 1 pede refresh tokens no Redis com rotação, rejeição de reuso e revogação em até 5 s.
 
-## Decisão proposta
+## Decisão
 1. O **Keycloak** é o único emissor de tokens (OIDC, RS256) e o único lugar com senhas (RNF23). Realm `pulsepass`, papéis `cliente`, `organizador`, `operador`, `admin`.
 2. O `iam-service` atua como **BFF de autenticação** para a SPA: faz o fluxo Authorization Code + PKCE com o Keycloak, recebe access e refresh tokens e **guarda o refresh token do Keycloak no Redis**, cifrado (AES-GCM, chave via variável de ambiente), sob a chave `iam:sessao:{sessaoId}` com TTL de 8 h.
 3. A SPA recebe o access token (≤ 5 min) e um **identificador de sessão opaco** em cookie `HttpOnly; Secure; SameSite=Strict`. A SPA nunca vê o refresh token do Keycloak.

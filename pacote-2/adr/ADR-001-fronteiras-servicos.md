@@ -1,11 +1,11 @@
 # ADR-001: Fronteiras dos microsserviços e propriedade de dados
 
-**Estado:** Proposta para revisão do grupo · 04/11/2026
+**Estado:** Aceita pelo grupo em 04/11/2026
 
 ## Contexto
 O enunciado define cinco frentes funcionais autônomas e exige microsserviços. O Pacote 1 adotou *Database per Service* (P03) e arquitetura hexagonal (RNF34), mas não definiu quantos processos implantáveis existem nem quem é dono de cada dado.
 
-## Decisão proposta
+## Decisão
 - Um serviço Spring Boot por módulo: `iam-service`, `inventory-service`, `checkout-service`, `ticket-service`, `telemetry-service`.
 - Dois processos de borda: `api-gateway` (Spring Cloud Gateway) e `realtime-service` (WebSocket/STOMP), este último pertencente ao módulo 4 (Mensageria e Despacho).
 - Um contêiner PostgreSQL com **um banco lógico e um usuário por serviço**; cada usuário só tem privilégio no próprio banco. Keycloak tem banco próprio.

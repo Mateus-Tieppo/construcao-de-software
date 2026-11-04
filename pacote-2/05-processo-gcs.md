@@ -1,7 +1,7 @@
 # 5. Descrição do Processo de GCS (Gerenciamento da Configuração de Software)
 
 > Versão 1.0 · 04/11/2026 · Grupo 9 · Será atualizado nos Pacotes 3 e 4.
-> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Proposta para revisão do grupo]**.
+> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Decisão do grupo, Pacote 2]** (escolha nova, aprovada pelo grupo em 04/11/2026 com os ADRs) · **[Proposta para revisão do grupo]** (detalhe ainda não revisado pelo grupo).
 > O enunciado pede: ferramenta, descrição do fluxo de trabalho (branches, regras de uso, ...). O fluxo de branches e as regras de PR foram definidos no Pacote 1 (seção 1.7) e são mantidos aqui; este documento detalha o processo e separa **regra definida** de **configuração técnica já ativa**.
 
 ## 5.1 Ferramentas
@@ -153,7 +153,7 @@ A linha de uso de IA cumpre o processo do Pacote 1: o agente gera, o humano veri
 | Tags de baseline | Sim | **Não**: o repositório remoto não tem nenhuma tag (`git ls-remote --tags`, 04/11/2026) | Criar `pacote-1` (commit `644f965`) e `pacote-2` em `main` após a aprovação do grupo |
 | Fluxo de PR para documentos | Sim | Em uso | O plano do Pacote 2 entrou por PR (`docs/plano-pacote-2` → `main`, PR #1); este pacote entra por `docs/pacote-2` → `main` |
 
-Enquanto não houver código nem `develop`, as entregas documentais seguem `docs/*` → PR → `main`, com revisão de outro integrante antes do merge **[Proposta para revisão do grupo]** (ADR-006). As regras de proteção estão descritas como processo; nenhuma aprovação ou proteção técnica é alegada sem ter sido configurada.
+Enquanto não houver código nem `develop`, as entregas documentais seguem `docs/*` → PR → `main`, com revisão de outro integrante antes do merge **[Decisão do grupo, Pacote 2]** (ADR-006). As regras de proteção estão descritas como processo; nenhuma aprovação ou proteção técnica é alegada sem ter sido configurada.
 
 ## 5.9 Rastreabilidade
 

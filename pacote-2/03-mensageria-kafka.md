@@ -1,8 +1,8 @@
 # 3. Descrição da Estrutura de Mensageria do Kafka
 
 > Versão 1.0 · 04/11/2026 · Grupo 9 · Será atualizado nos Pacotes 3 e 4.
-> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Proposta para revisão do grupo]**.
-> Números de partições, retenções e nomes de tópicos abaixo são **propostas do grupo**, não exigências do professor. O enunciado exige Kafka como provedor de streaming e o tratamento do dilema da escrita dupla e da idempotência no consumo.
+> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Decisão do grupo, Pacote 2]** (escolha nova, aprovada pelo grupo em 04/11/2026 com os ADRs) · **[Proposta para revisão do grupo]** (detalhe ainda não revisado pelo grupo).
+> Números de partições, retenções e nomes de tópicos abaixo são **decisões do grupo** (Pacote 2, ADR-005), não exigências do professor. O enunciado exige Kafka como provedor de streaming e o tratamento do dilema da escrita dupla e da idempotência no consumo.
 
 ## 3.1 Visão geral
 
@@ -51,7 +51,7 @@ flowchart LR
 
 ## 3.2 Catálogo de tópicos
 
-Convenção de nome: `<contexto>.<agregado>.v<versão-major>` **[Proposta para revisão do grupo]**. Um tópico por agregado mantém em ordem todos os eventos da mesma reserva ou do mesmo pedido (ADR-005). O nome `inventario.reserva-expirada.v1`, citado como exemplo na spec da US18 do Pacote 1, passa a ser o tipo `ReservaExpirada` dentro de `inventario.reservas.v1`; o nome `PagamentoConfirmado` do Pacote 1 é mantido como tipo de evento.
+Convenção de nome: `<contexto>.<agregado>.v<versão-major>` **[Decisão do grupo, Pacote 2]**. Um tópico por agregado mantém em ordem todos os eventos da mesma reserva ou do mesmo pedido (ADR-005). O nome `inventario.reserva-expirada.v1`, citado como exemplo na spec da US18 do Pacote 1, passa a ser o tipo `ReservaExpirada` dentro de `inventario.reservas.v1`; o nome `PagamentoConfirmado` do Pacote 1 é mantido como tipo de evento.
 
 | Tópico | Tipos de evento | Produtor | Consumer groups | Chave | Ordem necessária | Partições | Retenção | DLQ |
 |---|---|---|---|---|---|---|---|---|
@@ -67,7 +67,7 @@ Configuração comum:
 
 | Item | Ambiente local (Compose) | Observação para produção |
 |---|---|---|
-| Brokers do cluster | 1 nó KRaft (broker e controller), por limite de memória do notebook de referência (RNF37) | 3 nós |
+| Brokers do cluster | 1 nó KRaft (broker e controller), por limite de memória do notebook de referência (RNF37) **[Decisão do grupo, Pacote 2, 04/11/2026]** | 3 nós |
 | Fator de replicação | 1 | 3, com `min.insync.replicas=2` |
 | Produtor | `acks=all`, `enable.idempotence=true`, `max.in.flight.requests.per.connection=5` | Igual (mantém ordem por partição com idempotência) |
 | Consumidor | `enable.auto.commit=false`, `isolation.level=read_committed`, `max.poll.records=50` | Igual |
@@ -81,7 +81,7 @@ A navegação vem da SPA, não de uma mudança de estado no banco. O Telemetry S
 
 ## 3.3 Envelope dos eventos
 
-Todos os eventos de domínio usam o mesmo envelope JSON **[Proposta para revisão do grupo, detalhando RNF36]**:
+Todos os eventos de domínio usam o mesmo envelope JSON **[Decisão do grupo, Pacote 2 (ADR-005), detalhando RNF36]**:
 
 ```json
 {
@@ -221,7 +221,7 @@ Regras:
 
 ## 3.8 Retries, DLQ e ordem
 
-| Etapa | Comportamento **[Decisão do grupo, Pacote 1 (RNF08)] + detalhes propostos** |
+| Etapa | Comportamento **[Decisão do grupo, Pacote 1 (RNF08)] + detalhes do ADR-005** |
 |---|---|
 | Erro transitório (banco indisponível, timeout) | Até 3 tentativas no próprio consumidor, *backoff* 1 s, 2 s, 4 s (`DefaultErrorHandler` do Spring Kafka). A partição fica parada durante essas tentativas, o que **preserva a ordem** |
 | Erro permanente (JSON inválido, esquema desconhecido, violação de regra) | Vai direto para a DLQ, sem tentativas (classificado como não repetível) |

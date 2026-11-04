@@ -1,7 +1,7 @@
 # 6. Revisão e Evidências da Entrega (Pacote 2)
 
 > Auditoria de apoio, **não faz parte dos cinco entregáveis** e não entra no PDF. Produzida em 04/11/2026 pelo Claude Code seguindo `PLANO-PACOTE-2.md`, a partir da base `b211f09` (merge do PR #1) na branch `docs/pacote-2`.
-> **Pendente:** revisão humana do grupo. Nenhuma proposta deste pacote foi aprovada pelo grupo até a geração deste arquivo.
+> **Revisão do grupo:** em 04/11/2026 o grupo aceitou os ADRs 001 a 006 e decidiu manter o Kafka com 1 nó no Compose (seção 6.9).
 
 ## 6.1 Arquivos produzidos
 
@@ -12,7 +12,7 @@
 | `03-mensageria-kafka.md` | Catálogo de 6 tópicos + DLQ, envelope, evolução, Outbox, consumo idempotente, PDF/e-mail, retries e DLQ, consumer groups, 9 cenários de falha |
 | `04-pipeline-desenvolvimento.md` | Fluxo ponta a ponta, 9 jobs, esboço do `ci.yml`, Compose, build/publicação/implantação, estado real da iteração 2 |
 | `05-processo-gcs.md` | Ferramentas, itens de configuração, branches, ciclo de mudança, template de PR, baselines, estado real da configuração |
-| `adr/ADR-001` a `ADR-006` | Decisões novas, todas como proposta |
+| `adr/ADR-001` a `ADR-006` | Decisões novas, aceitas pelo grupo em 04/11/2026 |
 | `contratos/` | 7 exemplos JSON de eventos no envelope comum |
 | `package.json`, `package-lock.json`, `build-pdf.mjs` | Gerador reproduzível do PDF (marked 12.0.2, mermaid 11.4.1, playwright-core 1.48.2 com o Chrome do sistema) |
 | `Pacote2_Grupo9.pdf` | Consolidado dos documentos 01 a 05 |
@@ -37,7 +37,7 @@
 | Zero overselling; reserva de 10 min; alocação e devolução atômicas | Enunciado, Inventário | 01, 1.4.1 e 1.5.1/1.5.3; 02, 2.6; ADR-002 | Atendido | Invariantes I1, I2, I3 |
 | PDF com carimbo de tempo e QR Code; atualização em tempo real | Enunciado, Ingressos | 01, 1.4.3 e 1.6; 03, 3.7 | Atendido | Figura 6 |
 | Telemetria: ingestão de navegação e compras, painel | Enunciado, Telemetria | 01, 1.4.5; 03, 3.2.1 | Atendido | Figura 8 |
-| RBAC 4 papéis, JWT stateless, refresh em chave-valor | Enunciado, IAM | 01, 1.4.4 e 1.7; ADR-004 | Atendido como proposta (spike pendente) | Figura 7 |
+| RBAC 4 papéis, JWT stateless, refresh em chave-valor | Enunciado, IAM | 01, 1.4.4 e 1.7; ADR-004 | Atendido (ADR-004 aceito; spike pendente) | Figura 7 |
 
 ### 6.2.1 Histórias e RNFs pedidos no plano
 
@@ -56,7 +56,7 @@
 | Expiração estrita versus tolerância de 5 s | Reserva inválida exatamente em `expira_em` (relógio do PostgreSQL); a tolerância do RNF03 vale só para a limpeza física e as projeções | ADR-002 itens 3 a 5; 01, Figura 11 |
 | Redis/lock versus PostgreSQL | Posse decidida só por `UPDATE` condicional no PostgreSQL; Redis guarda cache, projeções, *rate limit*, sessões e revogação | ADR-002 item 6; 01, 1.3.1 |
 | Pagamento versus expiração entre bancos | Inventário é o ponto de decisão; simulador em duas fases; pagamento tardio cancela a autorização e vira Expirado (`PAGAMENTO_TARDIO`) | ADR-003; 01, Figuras 10 e 11; 02, 2.4 |
-| Keycloak e refresh tokens em chave-valor | IAM como BFF guarda o refresh do Keycloak cifrado no Redis; SPA recebe identificador opaco; rotação, detecção de reuso e revogação ≤ 5 s pelo Gateway. Marcado como proposta pendente de spike | ADR-004; 01, 1.4.4 |
+| Keycloak e refresh tokens em chave-valor | IAM como BFF guarda o refresh do Keycloak cifrado no Redis; SPA recebe identificador opaco; rotação, detecção de reuso e revogação ≤ 5 s pelo Gateway. ADR aceito pelo grupo; spike técnico no início do Pacote 3 | ADR-004; 01, 1.4.4 |
 | Repetição HTTP | Escopo usuário + rota + chave; hash do pedido; 409 em andamento, 422 corpo diferente (US22), reconciliação após 30 s; retenção 24 h | 01, 1.5.4 |
 | Ordem, retries e consumidor | Chave por agregado, `agregadoVersao`, transições guardadas, Inbox na mesma transação do efeito; sem ordem global entre tópicos | 03, 3.6 e 3.8 |
 | Escopo atual versus compromissos futuros | Estado real registrado: nenhum código, Compose, workflow, `develop`, tag ou proteção de branch | 04, 4.6; 05, 5.8 |
@@ -107,7 +107,7 @@
 
 ## 6.7 Limitações e pendências reais
 
-1. **Revisão do grupo:** Gabriel e Filipe precisam ler e aprovar (ou ajustar) os ADRs 001 a 006 e os rótulos de proposta antes do envio.
+1. **Revisão do grupo:** feita em 04/11/2026 para os ADRs (seção 6.9). Sete detalhes fora dos ADRs seguem marcados como proposta (lista na seção 6.9).
 2. **Envio ao Moodle:** não foi feito. A tela de envio (conferida em 04/11/2026, sem enviar) aceita upload de arquivos com até 250 MB e 20 anexos, sem formato obrigatório; anexar `pacote-2/Pacote2_Grupo9.pdf` (≈ 0,85 MB).
 3. **Spike do ADR-004** (Keycloak + refresh no Redis) fica para o início do Pacote 3.
 4. **Esqueleto, Compose e CI** (compromisso da iteração 2 no processo do Pacote 1) não foram iniciados; propostos como primeira tarefa da iteração 3.
@@ -138,4 +138,22 @@ Correções feitas nesta verificação:
 4. "Valida identidade com o IAM": a seção 1.7 explica que o módulo IAM é o IAM Service + Keycloak e que todos validam o JWT assinado por ele.
 5. "Disparo multicanal": a tabela do Ticket Service descreve a porta `CanalNotificacao` (e-mail e tela agora; SMS e push como adaptadores futuros, US27). Também foi acrescentada no C3 do Ticket a gravação na Outbox pelo `ValidarIngresso` (evento `IngressoUtilizado`), que faltava no diagrama.
 
-Ponto que depende de decisão do grupo, não de correção de texto: o enunciado fala em "cluster Kafka"; o desenho usa 1 nó no Compose por memória. Se o grupo preferir, dá para subir 3 nós KRaft no Compose com fator de replicação 3 (≈ 2 GB a mais de RAM).
+Ponto que dependia de decisão do grupo: o enunciado fala em "cluster Kafka" e o desenho usa 1 nó no Compose por memória. Decidido em 04/11/2026: manter 1 nó (seção 6.9).
+
+## 6.9 Decisões do grupo (04/11/2026)
+
+| Decisão | Registro |
+|---|---|
+| ADR-001 a ADR-006 aceitos pelo grupo (Gabriel, Mateus e Filipe) | Estado atualizado em cada ADR e em `adr/README.md`; trechos dos documentos que dependem deles passaram de **[Proposta para revisão do grupo]** para **[Decisão do grupo, Pacote 2]** |
+| Kafka com 1 nó KRaft no Compose | Documento 3, seção 3.2 (configuração comum) |
+| ADR-004 aceito com spike técnico no início do Pacote 3 | Estado do ADR-004 |
+
+Detalhes que **não** fazem parte de um ADR e continuam marcados como proposta, para o grupo confirmar quando quiser:
+
+1. Regras da Idempotency-Key (documento 1, seção 1.5.4)
+2. Desenho dos canais WebSocket (documento 1, seção 1.6)
+3. Lote pertence a um setor (documento 2, seção 2.3.1)
+4. Navegação publicada sem Outbox (documento 3, seção 3.2.1)
+5. Detalhes de execução da CI (documento 4, seção 4.3.1)
+6. Esqueleto dos serviços como primeira tarefa da iteração 3 (documento 4, seção 4.6)
+7. Regras de versionamento e baselines (documento 5, seção 5.6)

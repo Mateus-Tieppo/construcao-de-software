@@ -1,7 +1,7 @@
 # 2. Descrição do Modelo de Dados Conceitual
 
 > Versão 1.0 · 04/11/2026 · Grupo 9 · Será atualizado nos Pacotes 3 e 4.
-> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Proposta para revisão do grupo]**.
+> Rótulos: **[Enunciado]** · **[Decisão do grupo, Pacote 1]** · **[Decisão do grupo, Pacote 2]** (escolha nova, aprovada pelo grupo em 04/11/2026 com os ADRs) · **[Proposta para revisão do grupo]** (detalhe ainda não revisado pelo grupo).
 > Modelo **conceitual**: mostra conceitos do negócio, relacionamentos, cardinalidades e regras. Tipos físicos, índices e migrações serão definidos com o código (Pacote 3).
 
 ## 2.1 Princípios

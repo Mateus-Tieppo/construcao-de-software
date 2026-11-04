@@ -1,11 +1,11 @@
 # ADR-006: Fluxo de entrega, CI e baselines
 
-**Estado:** Proposta para revisão do grupo · 04/11/2026 (o fluxo de branches é decisão do Pacote 1; a configuração técnica é proposta)
+**Estado:** Aceita pelo grupo em 04/11/2026 (o fluxo de branches já era decisão do Pacote 1; a configuração técnica no GitHub ainda não foi feita)
 
 ## Contexto
 O Pacote 1 (seção 1.7) definiu Git Flow simplificado: `main`, `develop`, `feature/*`, `fix/*`, `docs/*`, PR com CI verde e uma aprovação humana, *squash* em `develop`, tags `pacote-N`. O enunciado exige CI no GitHub Actions a cada Pull Request ou merge em `develop`. Na inspeção de 04/11/2026 só existiam `main` e branches `docs/*`; não havia `develop`, workflows nem proteção de branch verificada.
 
-## Decisão proposta
+## Decisão
 1. Manter o fluxo do Pacote 1 sem mudanças de nome.
 2. Workflow `ci.yml` com gatilhos `pull_request` (destino `develop` e `main`) e `push` em `develop` (o merge de um PR gera um `push`; não existe evento chamado `merge`).
 3. Workflow `release.yml` em `push` de tag `pacote-*` ou `v*`: constrói e publica imagens no GHCR.

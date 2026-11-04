@@ -1,11 +1,11 @@
 # ADR-003: Ponto de decisão entre pagamento e expiração
 
-**Estado:** Proposta para revisão do grupo · 04/11/2026
+**Estado:** Aceita pelo grupo em 04/11/2026
 
 ## Contexto
 Checkout e Inventário têm bancos distintos. Um pagamento aprovado perto do 10º minuto pode chegar depois que o Inventário expirou a reserva e realocou o assento. Uma notificação Kafka atrasada não pode vender um assento já devolvido. A US19 diz que pagamento confirmado às 20:09:59 prevalece; a US21 diz que pagamento tardio sobre pedido Expirado gera estorno simulado.
 
-## Decisão proposta
+## Decisão
 1. **O ponto de decisão é o Inventário.** A venda só é efetiva quando `POST /internal/reservas/{reservaId}/confirmacao` comita no banco do Inventário com `estado='ATIVA' AND now() < expira_em`. Essa mesma transação marca os assentos `VENDIDO` e grava `ReservaConfirmada` na Outbox.
 2. O simulador de gateway trabalha em **duas fases**: `autorizar` (reserva o valor) e depois `capturar` ou `cancelar`. Ordem no Checkout: autorizar → confirmar no Inventário → capturar → pedido `Pago`.
 3. Se o Inventário responder `409 RESERVA_EXPIRADA`, o Checkout cancela a autorização, leva o pedido a `Expirado` (motivo `PAGAMENTO_TARDIO`) e grava `EstornoSolicitado`. Não existe transição `Expirado → Pago`.

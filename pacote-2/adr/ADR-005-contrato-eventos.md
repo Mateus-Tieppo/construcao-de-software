@@ -1,11 +1,11 @@
 # ADR-005: Contrato de eventos, Outbox e consumo idempotente
 
-**Estado:** Proposta para revisão do grupo · 04/11/2026
+**Estado:** Aceita pelo grupo em 04/11/2026
 
 ## Contexto
 O enunciado exige tratar o dilema da escrita dupla e a idempotência no consumo. O Pacote 1 fixou Transactional Outbox (RNF06), deduplicação por `eventId` (RNF07) e DLQ após 3 tentativas (RNF08), e citou os nomes `inventario.reserva-expirada.v1` e `PagamentoConfirmado`.
 
-## Decisão proposta
+## Decisão
 1. **Um tópico por agregado e contexto**, com o tipo do evento no envelope: `inventario.reservas.v1`, `checkout.pedidos.v1`, `ingressos.v1` etc. Chave da mensagem = ID do agregado. Assim todos os eventos de uma reserva ficam na mesma partição e em ordem.
 2. O nome `inventario.reserva-expirada.v1` do Pacote 1 é substituído por `inventario.reservas.v1` com `tipo = ReservaExpirada`. Motivo: tópicos separados por tipo não garantem a ordem entre "criada", "confirmada" e "expirada" da mesma reserva.
 3. Envelope comum com `eventId`, `tipo`, `schemaVersion`, `ocorridoEm` (UTC), `produtor`, `agregadoId`, `agregadoVersao`, `correlationId`, `causationId`, `traceparent` e `dados`.
