@@ -14,10 +14,12 @@ O [plano do Pacote 2](pacote-2/PLANO-PACOTE-2.md) foi preparado a partir do enun
 | Pacote | Prazo | Pasta |
 |---|---|---|
 | 1 – Processo de Desenvolvimento e Requisitos | 14/10/2026 23:59 | `pacote-1/` |
-| 2 – Arquitetura e Infraestrutura | 04/11/2026 23:59 | `pacote-2/` (plano de execução) |
+| 2 – Arquitetura e Infraestrutura | 04/11/2026 23:59 | `pacote-2/` (PDF: `pacote-2/Pacote2_Grupo9.pdf`) |
 | 3 – Checkpoint do Desenvolvimento | 23/11/2026 | — |
 | 4 – Produto Completo | 02/12/2026 | — |
 
 Sala de entrega do Pacote 1: https://moodle.pucrs.br/mod/assign/view.php?id=3923522
 Sala de entrega do Pacote 2: https://moodle.pucrs.br/mod/assign/view.php?id=3923525
 PDF original do enunciado: Moodle → TDE → "Enunciado do Trabalho" (texto completo em `contexto/01-enunciado-projeto-final.md`).
+
+Para regenerar o PDF do Pacote 2: `cd pacote-2 && npm ci && npm run pdf` (requer Google Chrome instalado).

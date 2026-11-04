@@ -1,0 +1,18 @@
+{
+  "eventId": "0193f690-0000-7000-8000-000000000401",
+  "tipo": "EventoVisualizado",
+  "schemaVersion": 1,
+  "ocorridoEm": "2026-11-04T22:58:12.000Z",
+  "produtor": "telemetry-service",
+  "agregadoId": "0193e0aa-0000-7000-8000-000000000001",
+  "agregadoVersao": 0,
+  "correlationId": "0193e0aa-0000-7000-8000-000000000001",
+  "causationId": null,
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+  "dados": {
+    "eventoId": "0193e0aa-0000-7000-8000-000000000001",
+    "sessaoAnonima": "b7e1c1d2-0000-4000-8000-000000000009",
+    "origem": "spa",
+    "visualizadoEm": "2026-11-04T22:58:12.000Z"
+  }
+}

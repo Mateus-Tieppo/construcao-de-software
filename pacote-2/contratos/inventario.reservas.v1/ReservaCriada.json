@@ -1,0 +1,29 @@
+{
+  "eventId": "0193f6a0-2c4e-7000-8000-000000000101",
+  "tipo": "ReservaCriada",
+  "schemaVersion": 1,
+  "ocorridoEm": "2026-11-04T23:00:00.000Z",
+  "produtor": "inventory-service",
+  "agregadoId": "0193f6a0-2c4d-7e8f-9a01-b2c3d4e5f607",
+  "agregadoVersao": 1,
+  "correlationId": "0193f6a0-11aa-7d2e-8b55-0f3c2a9e4d71",
+  "causationId": null,
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+  "dados": {
+    "reservaId": "0193f6a0-2c4d-7e8f-9a01-b2c3d4e5f607",
+    "pedidoId": "0193f6a0-11aa-7d2e-8b55-0f3c2a9e4d71",
+    "eventoId": "0193e0aa-0000-7000-8000-000000000001",
+    "compradorId": "6f1c2d3e-4b5a-4c6d-8e7f-90a1b2c3d4e5",
+    "assentos": [
+      {
+        "assentoId": "0193e0ab-0000-7000-8000-0000000000a1",
+        "setor": "Pista",
+        "rotulo": "A-12",
+        "loteId": "0193e0ac-0000-7000-8000-000000000001",
+        "precoCentavos": 25000
+      }
+    ],
+    "criadaEm": "2026-11-04T23:00:00.000Z",
+    "expiraEm": "2026-11-04T23:10:00.000Z"
+  }
+}
