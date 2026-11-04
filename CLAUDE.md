@@ -21,23 +21,26 @@
 | `contexto/03-sdd-ia-aula09.md` | Aula de SDD/IA — base do item "processo com IA" |
 | `contexto/04-exercicios-anteriores.md` | Exercícios anteriores (stack e padrões) |
 | `pacote-1/PLANO-PACOTE-1.md` | **Checklist e critérios de pronto do Pacote 1** |
-| `pacote-1/0X-*.md` | Esqueletos dos 5 entregáveis |
+| `pacote-1/0X-*.md` | Documentos do Pacote 1 já produzidos; preservar como referência |
+| `pacote-2/PLANO-PACOTE-2.md` | Plano, fontes verificadas, ordem de execução e critérios de pronto do Pacote 2 |
+| `pacote-2/PROMPT-INICIAL.md` | Prompt para executar o Pacote 2 no Claude Code |
 
-## Tarefa atual: PACOTE 1 — prazo 14/10/2026 23:59
-Leia `pacote-1/PLANO-PACOTE-1.md` e preencha os 5 arquivos `pacote-1/01..05`. Siga a ordem do plano.
-Diagramas em **Mermaid** dentro do Markdown (story map, navegação, ciclo do processo). Mockups: HTML/SVG simples em `pacote-1/mockups/` (low/medium fidelity basta).
-No fim, gerar `pacote-1/Pacote1_Grupo9.pdf` consolidando tudo (capa com disciplina, grupo e data).
+## Tarefa atual: PACOTE 2 — prazo 04/11/2026 23:59
+Prazo conferido no Moodle em 04/11/2026: https://moodle.pucrs.br/mod/assign/view.php?id=3923525.
+Leia `pacote-2/PLANO-PACOTE-2.md` e execute as etapas para produzir os cinco documentos de arquitetura/infraestrutura, a revisão e `pacote-2/Pacote2_Grupo9.pdf`.
+O Pacote 1 já possui documentos, mockups e PDF; preserve `pacote-1/` e use suas decisões como referência. A tarefa atual é a entrega documental do Pacote 2; não confundir com implementação completa dos Pacotes 3/4. O plano registra separadamente o compromisso de scaffold/Compose/CI da iteração 2.
+Diagramas em Mermaid renderizados no PDF. Diferencie exigência oficial, decisão já registrada e proposta para revisão. Não alegue execução de testes, CI, infraestrutura ou aprovação sem evidência. Não submeta ao Moodle automaticamente.
 
 ## Como trabalhar (o próprio processo SDD do grupo)
 1. Antes de escrever um entregável, releia o trecho relevante do enunciado (início do contexto) e os critérios de pronto do plano (fim do contexto).
 2. Escreva um entregável por vez; não tente fazer tudo num passo só.
 3. Ao terminar cada um, faça uma verificação adversarial: compare item a item com a tabela "Pronto quando…" do plano e com a lista de requisitos do domínio acima, e liste o que falta antes de seguir.
 
-## Critérios de verificação do Pacote 1
-- [ ] Os 5 itens do enunciado estão presentes, cada um com título igual ao do enunciado.
-- [ ] Todos os 5 módulos funcionais aparecem na Visão, no Story Map e nos RNFs.
-- [ ] Histórias no formato "Como… quero… para…" com critérios de aceitação.
-- [ ] RNFs com métrica verificável.
-- [ ] Mapa de navegação cobre os 4 perfis.
-- [ ] Processo com IA cita ciclo, ferramentas, agentes e specs.
-- [ ] PDF final gerado e legível.
+## Critérios de verificação do Pacote 2
+- [ ] C4 C1/C2/C3, dados conceituais, Kafka, pipeline e GCS completos.
+- [ ] Cinco módulos e quatro perfis contemplados, com rastreabilidade para histórias/RNFs.
+- [ ] Concorrência, expiração, pagamento, Outbox e idempotência resolvidos de forma consistente.
+- [ ] Pipeline descreve PR/merge em develop, lint, testes, build, cobertura de domínio ≥ 70% e Testcontainers.
+- [ ] Processo GCS preserva revisão humana e distingue regras documentadas de configuração efetiva.
+- [ ] Checklist detalhado do plano atendido e evidências em `pacote-2/06-verificacao-entrega.md`.
+- [ ] PDF consolidado gerado com diagramas renderizados e todas as páginas verificadas.
