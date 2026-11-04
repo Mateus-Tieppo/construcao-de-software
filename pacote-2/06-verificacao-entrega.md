@@ -108,10 +108,34 @@
 ## 6.7 Limitações e pendências reais
 
 1. **Revisão do grupo:** Gabriel e Filipe precisam ler e aprovar (ou ajustar) os ADRs 001 a 006 e os rótulos de proposta antes do envio.
-2. **Envio ao Moodle:** não foi feito. Na tela de envio, conferir formato e tamanho aceitos (a tarefa não informa limites) e anexar `pacote-2/Pacote2_Grupo9.pdf` (≈ 0,85 MB).
+2. **Envio ao Moodle:** não foi feito. A tela de envio (conferida em 04/11/2026, sem enviar) aceita upload de arquivos com até 250 MB e 20 anexos, sem formato obrigatório; anexar `pacote-2/Pacote2_Grupo9.pdf` (≈ 0,85 MB).
 3. **Spike do ADR-004** (Keycloak + refresh no Redis) fica para o início do Pacote 3.
 4. **Esqueleto, Compose e CI** (compromisso da iteração 2 no processo do Pacote 1) não foram iniciados; propostos como primeira tarefa da iteração 3.
 5. **Configuração do GitHub:** criar `develop`, proteção de branches e as tags `pacote-1` (commit `644f965`) e `pacote-2` exige um integrante com permissão de admin.
 6. **Atualizações no Pacote 3:** texto do RNF04 (transição `Aguardando → Reservado`), spec da US18 (lock no PostgreSQL) e US19 (definição de "pagamento confirmado").
 7. Diagramas de componentes mostram os componentes principais; nomes de classes podem mudar na implementação.
 8. Os arquivos fonte Markdown usam `%% paisagem` na primeira linha de alguns diagramas: é um comentário Mermaid usado só pelo gerador do PDF e não aparece no GitHub.
+
+## 6.8 Verificação final contra o enunciado (04/11/2026, 18h40)
+
+Releitura item a item de `contexto/01-enunciado-projeto-final.md` contra os cinco documentos, com busca automática dos termos de cada exigência no texto dos documentos e revisão manual de cada ponto.
+
+| Bloco do enunciado | Itens conferidos | Resultado |
+|---|---|---|
+| Entregáveis do Pacote 2 | Os 5 itens, com os títulos do enunciado | Todos presentes |
+| C4 nível 1 | Fronteiras, perfis (comprador, organizador, operador), gateways bancários, disparo de e-mails | Atendido |
+| C4 nível 2 | SPA, APIs backend, PostgreSQL/Redis, cluster Kafka, servidores WebSocket | Atendido após correção 1 |
+| C4 nível 3 | Controladores de borda, casos de uso, repositórios, workers do Outbox, consumidores | Atendido nos 5 serviços |
+| Aspectos de arquitetura | Microsserviços, Keycloak, Kafka, dual-write, idempotência no consumo | Atendido após correção 2 |
+| Testes e DevOps | Unitários da FSM com ≥ 70% de domínio, Testcontainers PG/Kafka/Redis, carga (bônus), GCS, Compose com UI de mensageria, CI a cada PR ou merge em `develop` | Descrito (implementação nos Pacotes 3 e 4) |
+| Frentes funcionais (requisitos e integração técnica) | IAM: JWT stateless, refresh em chave-valor, RBAC, auditoria, gestão de organizadores, assinatura de tokens. Inventário: lotes, mapas, catálogo de alta leitura, alocação e devolução atômicas, validação com IAM, locks, eventos de expiração. Checkout: FSM, Idempotency-Key, Outbox, simulador. Ingressos: consumo de pagamentos, PDF com carimbo e QR, multicanal, tempo real. Telemetria: ingestão, painel, CI/CD, Compose | Atendido após correções 3 a 5 |
+
+Correções feitas nesta verificação:
+
+1. "Cluster Kafka" não aparecia com o termo do enunciado: o C2 (Figura 2b e tabela 1.3.1) e o documento 3 passam a nomear o cluster e explicar que o Compose local usa 1 nó.
+2. A palavra "microsserviços" só aparecia no ADR-001, fora do PDF: incluída a declaração do estilo arquitetural na abertura da seção 1.3.
+3. "Emite locks concorrentes" (Inventário) não estava explícito: a tabela do `ReservarAssentos` diz que os locks são os bloqueios de linha do `UPDATE` condicional.
+4. "Valida identidade com o IAM": a seção 1.7 explica que o módulo IAM é o IAM Service + Keycloak e que todos validam o JWT assinado por ele.
+5. "Disparo multicanal": a tabela do Ticket Service descreve a porta `CanalNotificacao` (e-mail e tela agora; SMS e push como adaptadores futuros, US27). Também foi acrescentada no C3 do Ticket a gravação na Outbox pelo `ValidarIngresso` (evento `IngressoUtilizado`), que faltava no diagrama.
+
+Ponto que depende de decisão do grupo, não de correção de texto: o enunciado fala em "cluster Kafka"; o desenho usa 1 nó no Compose por memória. Se o grupo preferir, dá para subir 3 nós KRaft no Compose com fator de replicação 3 (≈ 2 GB a mais de RAM).

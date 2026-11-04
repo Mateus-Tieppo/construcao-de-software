@@ -67,7 +67,7 @@ Configuração comum:
 
 | Item | Ambiente local (Compose) | Observação para produção |
 |---|---|---|
-| Brokers | 1 broker KRaft | 3 brokers |
+| Brokers do cluster | 1 nó KRaft (broker e controller), por limite de memória do notebook de referência (RNF37) | 3 nós |
 | Fator de replicação | 1 | 3, com `min.insync.replicas=2` |
 | Produtor | `acks=all`, `enable.idempotence=true`, `max.in.flight.requests.per.connection=5` | Igual (mantém ordem por partição com idempotência) |
 | Consumidor | `enable.auto.commit=false`, `isolation.level=read_committed`, `max.poll.records=50` | Igual |

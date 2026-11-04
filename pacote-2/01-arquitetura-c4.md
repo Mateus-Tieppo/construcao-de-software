@@ -66,6 +66,8 @@ flowchart TB
 
 ## 1.3 Nível 2: Contêineres
 
+O PulsePass adota o estilo arquitetural de **microsserviços** **[Enunciado]**: um serviço implantável por módulo do enunciado, cada um com seu próprio banco lógico, comunicação síncrona (REST) só onde a resposta é necessária na hora e assíncrona (Kafka) nos demais casos (ADR-001).
+
 ```mermaid
 %% paisagem
 flowchart LR
@@ -118,7 +120,7 @@ flowchart LR
     tkt["<b>Ticket Service</b>"]
     tel["<b>Telemetry Service</b>"]
     rt["<b>Realtime Service</b>"]
-    kfk{{"<b>Apache Kafka</b><br/>[KRaft]<br/>tópicos de domínio + DLQ"}}
+    kfk{{"<b>Cluster Kafka</b><br/>[Apache Kafka, KRaft]<br/>tópicos de domínio + DLQ"}}
     pg[("<b>PostgreSQL 16</b><br/>bancos iam · inv · chk · tkt · tel<br/>(domínio + outbox + inbox)")]
     vol[("<b>Volume de PDFs</b>")]
     iam -- "iam.contas.v1" --> kfk
@@ -181,7 +183,7 @@ flowchart LR
 | Telemetry Service | 5. Telemetria e DevOps | Spring Boot 3, Micrometer | Recebe eventos de navegação da SPA, consome eventos de domínio, agrega funil e vendas, expõe métricas de negócio | Banco `tel` | [Enunciado] |
 | PostgreSQL | Infra | PostgreSQL 16 | Fonte da verdade de cada serviço, Outbox e Inbox | 5 bancos + banco `keycloak` | [Decisão do grupo, Pacote 1 (P03)] |
 | Redis | Infra | Redis 7 (AOF ligado) | Sessões de refresh (cifradas), cache, *rate limit*, lista de revogação. **Não decide posse de assento** | Dados reconstruíveis, exceto sessões | [Proposta para revisão do grupo] (ADR-002, ADR-004) |
-| Kafka | Infra | Apache Kafka 3.8 (KRaft) | Streaming de eventos de domínio | Tópicos (documento 3) | [Enunciado] |
+| Cluster Kafka | Infra | Apache Kafka 3.8 (KRaft) | Streaming de eventos de domínio. No Compose local o cluster tem 1 nó; o desenho de tópicos e produtores vale para 3 nós sem mudança de código (documento 3, seção 3.2) | Tópicos (documento 3) | [Enunciado] |
 | Kafka UI | Infra | kafbat/kafka-ui | Inspeção de tópicos, grupos, lag e DLQ | Nenhum | [Decisão do grupo, Pacote 1 (P04)] |
 | Simulador de gateway | Externo | Spring Boot (código do grupo) | Autorizar, capturar, cancelar; modos de falha e atraso configuráveis | Banco em memória | [Decisão do grupo, Pacote 1 (P06)] |
 
@@ -262,7 +264,7 @@ flowchart LR
 
 | Componente | Responsabilidade | Regra crítica |
 |---|---|---|
-| `ReservarAssentos` | Recebe `pedidoId`, `eventoId` e 1 a 6 assentos; abre transação; executa o `UPDATE` condicional em ordem de `id`; cria `Reserva` com `expira_em`; grava `ReservaCriada` na Outbox | Linhas afetadas = assentos pedidos, senão *rollback* (RNF01, RNF02, ADR-002). Idempotente por `pedidoId` |
+| `ReservarAssentos` | Recebe `pedidoId`, `eventoId` e 1 a 6 assentos; abre transação; executa o `UPDATE` condicional em ordem de `id`; cria `Reserva` com `expira_em`; grava `ReservaCriada` na Outbox | Linhas afetadas = assentos pedidos, senão *rollback* (RNF01, RNF02, ADR-002). Os **locks concorrentes** exigidos pelo enunciado são os bloqueios de linha que esse `UPDATE` obtém no PostgreSQL, sempre na mesma ordem para evitar *deadlock*. Idempotente por `pedidoId` |
 | `ConfirmarReserva` | Chamado pelo Checkout após autorização do pagamento | Só confirma se `estado='ATIVA' AND now() < expira_em`; marca assentos `VENDIDO` (ADR-003) |
 | `LiberarReserva` | Cancelamento pelo comprador, falha de pagamento definitiva ou expiração | Devolve todos os assentos da reserva na mesma transação; grava `ReservaExpirada` ou `ReservaLiberada` |
 | `ExpiracaoWorker` | Varre reservas vencidas | Várias réplicas podem rodar: `FOR UPDATE SKIP LOCKED` impede duas limpezas da mesma reserva |
@@ -365,7 +367,7 @@ flowchart LR
     ingc --> repo
     ingc --> vol
     valc --> ucVal --> sign
-    ucVal --> repo
+    ucVal --> repo & outbox
     kfk --> consPg --> inbox --> ucEmit --> repo
     kfk --> consCat --> repo
     jobs --> pdf --> sign
@@ -387,7 +389,7 @@ flowchart LR
 | `PagamentoConfirmadoConsumer` + `InboxGuard` + `RegistrarEmissao` | Em uma transação: grava `(tkt-emissao, eventId)`, cria um ingresso `PENDENTE` por item de pedido e um job de PDF por ingresso | `UNIQUE (item_pedido_id)` garante um ingresso por assento mesmo com reprocessamento (RNF07) |
 | `PdfJobWorker` | Gera o PDF (evento, setor, assento, titular, carimbo de tempo, QR assinado), grava em `ingressos/{ingressoId}.pdf`, marca `EMITIDO` e grava `IngressoEmitido` na Outbox | Mesmo `ingressoId` sobrescreve o mesmo arquivo; após 3 falhas o job vai a `FALHOU` e gera alerta (US25) |
 | `ValidarIngresso` | Verifica assinatura, evento e vínculo do operador; `UPDATE ingresso SET estado='UTILIZADO' WHERE id=? AND estado='EMITIDO'` | Linha afetada = liberado; zero linhas = "já utilizado" ou inválido (RNF22, US29) |
-| `IngressoEmitidoConsumer` + `EmailAdapter` | Envia e-mail com PDF anexado | Registra `NOTIFICACAO` como PENDENTE antes do SMTP e ENVIADA depois; limite de idempotência no documento 3, seção 3.7 |
+| `IngressoEmitidoConsumer` + `EmailAdapter` | Envia e-mail com PDF anexado | Registra `NOTIFICACAO` como PENDENTE antes do SMTP e ENVIADA depois; limite de idempotência no documento 3, seção 3.7. O **disparo multicanal** passa por uma porta `CanalNotificacao`: e-mail (este adaptador) e tela (Realtime, WebSocket) no escopo atual; SMS e push entram como novos adaptadores sem mudar o caso de uso (US27) |
 | `DomainEventFanout` | Cada instância do Realtime usa um consumer group próprio (`rt-{instanceId}`), lendo do fim do tópico | Todas as instâncias recebem todos os eventos e entregam só às suas sessões (seção 1.6) |
 
 ### 1.4.4 IAM Service
@@ -623,7 +625,7 @@ Escopo da chave: `(usuarioId, metodo + rota, chave)`; duas pessoas podem usar o 
 
 | Tema | Decisão |
 |---|---|
-| Tokens | Access token JWT RS256 do Keycloak, validade ≤ 5 min, validado pelo JWKS em cada contêiner (RNF18) |
+| Tokens | Access token JWT RS256 do Keycloak, validade ≤ 5 min, validado pelo JWKS em cada contêiner (RNF18). É assim que o Inventário e os demais módulos "validam a identidade com o IAM" [Enunciado]: o módulo IAM é o conjunto IAM Service + Keycloak, e a assinatura criptográfica dos tokens vale para todas as rotas |
 | Sessão | Refresh token do Keycloak guardado cifrado no Redis pelo IAM; SPA recebe identificador opaco em cookie `HttpOnly` (ADR-004, RNF19) |
 | RBAC | Papéis no realm; anotações `@PreAuthorize` em todo controller e checagem de dono do recurso (organizador do evento, cliente do pedido, operador vinculado) (RNF20) |
 | Auditoria | Eventos de credencial gravados *append-only* no banco `iam` (permissão só de `INSERT` e `SELECT` para o usuário da aplicação) (RNF21) |
