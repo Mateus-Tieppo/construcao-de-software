@@ -10,7 +10,9 @@ export type Pedido = {
   expiraEm: string | null; itens: ItemPedido[]; ultimoPagamento: string | null; mensagem: string | null;
 };
 export type Ingresso = { id: string; pedidoId: string; setorAssento: string; estado: string; emitidoEm: string | null; codigoQr: string | null };
-export type Validacao = { resultado: 'LIBERADO' | 'JA_UTILIZADO' | 'INVALIDO' | 'NAO_AUTORIZADO'; setorAssento: string | null; titular: string | null };
+export type Validacao = {
+  resultado: 'LIBERADO' | 'JA_UTILIZADO' | 'INVALIDO' | 'NAO_AUTORIZADO'; setorAssento: string | null; titular: string | null; utilizadoEm: string | null;
+};
 
 export class ErroApi extends Error {
   constructor(public status: number, public codigo: string, mensagem: string) {

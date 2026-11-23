@@ -42,7 +42,10 @@ export default function ValidacaoPagina() {
       {erro && <p className="erro">{erro}</p>}
       {resultado && (
         <div className={`resultado resultado-${resultado.resultado.toLowerCase()}`}>
-          <strong>{MENSAGENS[resultado.resultado]}</strong>
+          <strong>
+            {MENSAGENS[resultado.resultado]}
+            {resultado.resultado === 'JA_UTILIZADO' && resultado.utilizadoEm && ` em ${new Date(resultado.utilizadoEm).toLocaleString('pt-BR')}`}
+          </strong>
           {resultado.setorAssento && <p>{resultado.setorAssento} · {resultado.titular}</p>}
         </div>
       )}

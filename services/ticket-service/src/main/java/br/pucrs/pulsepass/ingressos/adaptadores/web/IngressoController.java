@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -53,9 +54,18 @@ public class IngressoController {
 
   @GetMapping("/ingressos/{id}/pdf")
   public ResponseEntity<byte[]> pdf(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) throws IOException {
-    String caminho = jdbc.query("SELECT caminho_pdf FROM ingresso WHERE id = ? AND titular_id = ? AND estado <> 'PENDENTE'",
-        rs -> rs.next() ? rs.getString(1) : null, id, UUID.fromString(jwt.getSubject()));
-    if (caminho == null || !Files.exists(Path.of(caminho))) {
+    Map<String, Object> ingresso = jdbc.query("SELECT titular_id, caminho_pdf FROM ingresso WHERE id = ?",
+        rs -> rs.next() ? Map.<String, Object>of("titular", rs.getObject(1, UUID.class),
+            "caminho", rs.getString(2) == null ? "" : rs.getString(2)) : null, id);
+    if (ingresso == null) {
+      return ResponseEntity.notFound().build();
+    }
+    if (!ingresso.get("titular").equals(UUID.fromString(jwt.getSubject()))) {
+      // US26: ingresso de outro usuário
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    String caminho = (String) ingresso.get("caminho");
+    if (caminho.isEmpty() || !Files.exists(Path.of(caminho))) {
       return ResponseEntity.notFound().build();
     }
     return ResponseEntity.ok()

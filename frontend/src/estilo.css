@@ -45,4 +45,6 @@ input, textarea { padding: 8px 10px; border: 1px solid var(--borda); border-radi
 .qr { display: block; word-break: break-all; font-size: 11px; background: #f2f0eb; padding: 8px; border-radius: 6px; }
 .resultado { margin-top: 16px; padding: 18px; border-radius: 12px; font-size: 18px; }
 .resultado-liberado { background: #dff3e7; color: var(--ok); }
-.resultado-ja_utilizado, .resultado-invalido, .resultado-nao_autorizado { background: #f7e1de; color: var(--perigo); }
+.resultado-ja_utilizado { background: #fff3cd; color: #8a6100; }
+.resultado-invalido, .resultado-nao_autorizado { background: #f7e1de; color: var(--perigo); }
+.qr-img { display: block; width: 160px; height: 160px; margin: 8px auto; }

@@ -5,6 +5,8 @@ import br.pucrs.pulsepass.commons.outbox.OutboxWriter;
 import br.pucrs.pulsepass.ingressos.dominio.AssinaturaQr;
 import br.pucrs.pulsepass.ingressos.dominio.CodigoQr;
 import br.pucrs.pulsepass.ingressos.dominio.ResultadoValidacao;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,14 +28,15 @@ public class ValidacaoService {
     this.outbox = outbox;
   }
 
-  public record Resultado(ResultadoValidacao resultado, UUID ingressoId, String setorAssento, String titular) {
+  public record Resultado(ResultadoValidacao resultado, UUID ingressoId, String setorAssento, String titular,
+      Instant utilizadoEm) {
   }
 
   @Transactional
   public Resultado validar(String textoQr, UUID operadorId) {
     Optional<CodigoQr> lido = CodigoQr.ler(textoQr);
     if (lido.isEmpty()) {
-      return new Resultado(ResultadoValidacao.INVALIDO, null, null, null);
+      return new Resultado(ResultadoValidacao.INVALIDO, null, null, null, null);
     }
     CodigoQr qr = lido.get();
     boolean assinaturaOk = assinatura.verificar(qr.mensagemAssinada(), qr.assinatura());
@@ -55,8 +58,13 @@ public class ValidacaoService {
       outbox.gravar(PdfJobWorker.TOPICO_INGRESSOS, "IngressoUtilizado", qr.ingressoId(), 2, qr.ingressoId(),
           qr.ingressoId(), Map.of("ingressoId", qr.ingressoId(), "operadorId", operadorId));
     }
+    Instant utilizadoEm = null;
+    if (r == ResultadoValidacao.LIBERADO || r == ResultadoValidacao.JA_UTILIZADO) {
+      Timestamp ts = jdbc.queryForObject("SELECT utilizado_em FROM ingresso WHERE id = ?", Timestamp.class, qr.ingressoId());
+      utilizadoEm = ts == null ? null : ts.toInstant();
+    }
     return new Resultado(r, ingresso == null ? null : qr.ingressoId(),
         ingresso == null ? null : (String) ingresso.get("assento"),
-        ingresso == null ? null : (String) ingresso.get("titular"));
+        ingresso == null ? null : (String) ingresso.get("titular"), utilizadoEm);
   }
 }

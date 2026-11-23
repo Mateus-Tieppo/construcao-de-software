@@ -86,7 +86,12 @@ export default function PedidoPagina() {
         </div>
       )}
       {pedido.estado === 'PAGO' && <p>Pagamento confirmado. <Link to="/ingressos">Ver meus ingressos</Link> (a emissão leva alguns segundos).</p>}
-      {pedido.estado === 'EXPIRADO' && <p><Link to={`/eventos/${pedido.eventoId}`}>Escolher outros assentos</Link></p>}
+      {pedido.estado === 'EXPIRADO' && (
+        <p>
+          {pedido.motivoExpiracao === 'TIMEOUT' ? 'Sua reserva expirou. ' : ''}
+          <Link to={`/eventos/${pedido.eventoId}`}>Escolher outros assentos</Link>
+        </p>
+      )}
     </section>
   );
 }

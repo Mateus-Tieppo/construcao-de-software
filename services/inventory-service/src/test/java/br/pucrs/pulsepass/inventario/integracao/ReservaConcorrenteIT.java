@@ -73,10 +73,10 @@ class ReservaConcorrenteIT {
   }
 
   @Test
-  void vinteCompradoresDisputandoOMesmoAssentoSoUmVence() throws Exception {
+  void cemCompradoresDisputandoOMesmoAssentoSoUmVence() throws Exception {
     UUID alvo = assento("Pista", "A-1");
-    int compradores = 20;
-    ExecutorService pool = Executors.newFixedThreadPool(compradores);
+    int compradores = 100;
+    ExecutorService pool = Executors.newFixedThreadPool(32);
     AtomicInteger vencedores = new AtomicInteger();
     AtomicInteger recusados = new AtomicInteger();
     List<Future<?>> futuros = new ArrayList<>();
@@ -147,7 +147,7 @@ class ReservaConcorrenteIT {
   }
 
   @Test
-  void expiracaoDevolveAssentosEPublicaNoKafkaPelaOutbox() {
+  void expiracaoDevolveAssentosEPublicaNoKafkaPelaOutbox() throws InterruptedException {
     UUID a = assento("Pista", "C-1");
     ReservaResultado r = reservas.reservar(UUID.randomUUID(), UUID.randomUUID(), EVENTO, List.of(a));
     jdbc.update("UPDATE reserva SET expira_em = now() - interval '1 second' WHERE id = ?", r.reservaId());
@@ -157,8 +157,17 @@ class ReservaConcorrenteIT {
     assertThat(jdbc.queryForObject("SELECT estado FROM reserva WHERE id = ?", String.class, r.reservaId()))
         .isEqualTo("EXPIRADA");
 
-    relay.publicarPendentes();
-    Integer pendentes = jdbc.queryForObject("SELECT count(*) FROM outbox WHERE publicado_em IS NULL", Integer.class);
+    // o relay agendado também roda em paralelo e pode estar com o advisory lock: espera esvaziar a outbox
+    Integer pendentes = -1;
+    long prazo = System.currentTimeMillis() + 15000;
+    while (System.currentTimeMillis() < prazo) {
+      relay.publicarPendentes();
+      pendentes = jdbc.queryForObject("SELECT count(*) FROM outbox WHERE publicado_em IS NULL", Integer.class);
+      if (pendentes != null && pendentes == 0) {
+        break;
+      }
+      Thread.sleep(200);
+    }
     assertThat(pendentes).isZero();
 
     boolean achou = false;

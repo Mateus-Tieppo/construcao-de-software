@@ -85,7 +85,9 @@ class EmissaoIngressoIT {
     String qr = jdbc.queryForObject("SELECT codigo_qr FROM ingresso WHERE item_pedido_id = ?", String.class, item);
     UUID operador = UUID.randomUUID();
     assertThat(validacao.validar(qr, operador).resultado()).isEqualTo(ResultadoValidacao.LIBERADO);
-    assertThat(validacao.validar(qr, operador).resultado()).isEqualTo(ResultadoValidacao.JA_UTILIZADO);
+    ValidacaoService.Resultado segunda = validacao.validar(qr, operador);
+    assertThat(segunda.resultado()).isEqualTo(ResultadoValidacao.JA_UTILIZADO);
+    assertThat(segunda.utilizadoEm()).isNotNull();
     assertThat(validacao.validar(qr.substring(0, qr.length() - 3) + "abc", operador).resultado())
         .isEqualTo(ResultadoValidacao.INVALIDO);
   }

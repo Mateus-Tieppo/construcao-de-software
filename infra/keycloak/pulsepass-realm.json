@@ -138,5 +138,6 @@
         "cliente"
       ]
     }
-  ]
+  ],
+  "passwordPolicy": "length(8) and digits(1) and regexPattern(.*[A-Za-z].*) and notUsername"
 }

@@ -24,7 +24,9 @@ export default function Catalogo() {
             <h2>{e.nome}</h2>
             <p>{e.localCidade} · {new Date(e.inicio).toLocaleDateString('pt-BR')}</p>
             <p>A partir de <strong>{reais(e.precoMinimoCentavos)}</strong></p>
-            <p className="discreto">{e.disponiveis} lugares disponíveis</p>
+            {e.disponiveis === 0
+              ? <p className="estado estado-expirado">Esgotado</p>
+              : <p className="discreto">{e.disponiveis} lugares disponíveis</p>}
           </Link>
         ))}
       </div>

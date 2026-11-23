@@ -21,6 +21,15 @@ passo "Login do cliente e do operador no Keycloak"
 TC=$(token cliente); TO=$(token operador)
 [ -n "$TC" ] && [ "$TC" != null ] || falha "token do cliente"
 
+passo "Auto-cadastro recebe o papel cliente por padrão (US02)"
+TA=$(curl -sf -X POST "http://localhost:8180/realms/master/protocol/openid-connect/token" -d grant_type=password \
+  -d client_id=admin-cli -d username=admin -d password="${KEYCLOAK_ADMIN_PASSWORD:?defina KEYCLOAK_ADMIN_PASSWORD}" | jq -r .access_token)
+curl -sf "http://localhost:8180/admin/realms/pulsepass/roles/default-roles-pulsepass/composites/realm" \
+  -H "Authorization: Bearer $TA" | jq -e 'map(.name) | index("cliente") != null' > /dev/null || falha "papel padrão cliente"
+POLITICA=$(curl -sf "http://localhost:8180/admin/realms/pulsepass" -H "Authorization: Bearer $TA" | jq -r .passwordPolicy)
+echo "política de senha: $POLITICA"
+echo "$POLITICA" | grep -q 'length(8)' || falha "política de senha"
+
 passo "Catálogo público"
 curl -sf "$BASE/eventos" | jq -e 'length >= 1' > /dev/null || falha "catálogo vazio"
 SETOR=$(curl -sf "$BASE/eventos/$EVENTO" | jq -r '.setores[] | select(.nome=="Pista") | .id')
@@ -71,11 +80,18 @@ passo "Baixar PDF"
 curl -sf "$BASE/ingressos/$IID/pdf" -H "Authorization: Bearer $TC" -o /tmp/ingresso.pdf
 head -c 5 /tmp/ingresso.pdf | grep -q '%PDF-' || falha "PDF inválido"
 
+passo "Outro usuário não baixa o ingresso do cliente (US26): 403"
+TG=$(token organizador)
+COD=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/ingressos/$IID/pdf" -H "Authorization: Bearer $TG")
+[ "$COD" = 403 ] || falha "esperado 403, veio $COD"
+
 passo "Validar QR na entrada: primeira leitura libera, segunda acusa uso"
 V1=$(curl -sf -X POST "$BASE/validacoes" -H "Authorization: Bearer $TO" -H 'Content-Type: application/json' \
   -d "{\"codigoQr\":\"$QR\"}" | jq -r .resultado)
-V2=$(curl -sf -X POST "$BASE/validacoes" -H "Authorization: Bearer $TO" -H 'Content-Type: application/json' \
-  -d "{\"codigoQr\":\"$QR\"}" | jq -r .resultado)
+R2=$(curl -sf -X POST "$BASE/validacoes" -H "Authorization: Bearer $TO" -H 'Content-Type: application/json' \
+  -d "{\"codigoQr\":\"$QR\"}")
+V2=$(echo "$R2" | jq -r .resultado)
+[ "$(echo "$R2" | jq -r .utilizadoEm)" != null ] || falha "segunda leitura sem data/hora de uso"
 echo "1a leitura=$V1 2a leitura=$V2"
 [ "$V1" = LIBERADO ] && [ "$V2" = JA_UTILIZADO ] || falha "validação de QR"
 
