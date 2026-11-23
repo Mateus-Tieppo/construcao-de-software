@@ -25,7 +25,13 @@
 | `pacote-2/PLANO-PACOTE-2.md` | Plano, fontes verificadas, ordem de execução e critérios de pronto do Pacote 2 |
 | `pacote-2/PROMPT-INICIAL.md` | Prompt para executar o Pacote 2 no Claude Code |
 
-## Tarefa atual: PACOTE 2 — prazo 04/11/2026 23:59
+## Tarefa atual: PACOTE 3 — prazo 23/11/2026 23:59
+Sala: https://moodle.pucrs.br/mod/assign/view.php?id=3936265. Entregáveis do enunciado: link do repositório com o estágio corrente + documentação dos Pacotes 1 e 2 atualizada.
+Estado e evidências em `pacote-3/01-estado-desenvolvimento.md`; mudanças nos documentos em `pacote-3/02-registro-atualizacoes.md`; auditoria em `pacote-3/03-verificacao-entrega.md`.
+Código: Maven multi-módulo em `services/`, SPA em `frontend/`, `docker-compose.yml`, CI em `.github/workflows/ci.yml`. Persistência com JdbcTemplate (ADR-007); transições sempre por UPDATE condicional; eventos só pela Outbox.
+Próximo: Pacote 4 (02/12/2026), ver seção 1.8 do estado do desenvolvimento.
+
+## Histórico: PACOTE 2 — prazo 04/11/2026 23:59
 Prazo conferido no Moodle em 04/11/2026: https://moodle.pucrs.br/mod/assign/view.php?id=3923525.
 Leia `pacote-2/PLANO-PACOTE-2.md` e execute as etapas para produzir os cinco documentos de arquitetura/infraestrutura, a revisão e `pacote-2/Pacote2_Grupo9.pdf`.
 O Pacote 1 já possui documentos, mockups e PDF; preserve `pacote-1/` e use suas decisões como referência. A tarefa atual é a entrega documental do Pacote 2; não confundir com implementação completa dos Pacotes 3/4. O plano registra separadamente o compromisso de scaffold/Compose/CI da iteração 2.

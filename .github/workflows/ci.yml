@@ -65,7 +65,7 @@ jobs:
           for f in services/*/target/site/jacoco/jacoco.csv; do
             [ -f "$f" ] || continue
             svc=$(echo "$f" | cut -d/ -f2)
-            awk -F, -v s="$svc" 'NR>1 && $2 ~ /dominio/ {m+=$8; c+=$9} END {if (m+c>0) printf "- %s (dominio): %.1f%%\n", s, 100*c/(m+c)}' "$f" >> "$GITHUB_STEP_SUMMARY"
+            awk -F, -v s="$svc" 'NR>1 && $2 ~ /dominio/ {m+=$8; c+=$9; bm+=$6; bc+=$7} END {if (m+c>0) printf "- %s (dominio): linhas %.1f%%, ramos %.1f%%\n", s, 100*c/(m+c), (bm+bc>0 ? 100*bc/(bm+bc) : 100)}' "$f" | tee -a "$GITHUB_STEP_SUMMARY"
           done
       - uses: actions/upload-artifact@v4
         if: always()
