@@ -33,6 +33,8 @@
     <zxing.version>3.5.3</zxing.version>
     <springdoc.version>2.6.0</springdoc.version>
     <jacoco.version>0.8.12</jacoco.version>
+    <!-- 1.21.4+: compatível com o Docker Engine 29 dos runners (API mínima 1.44) -->
+    <testcontainers.version>1.21.4</testcontainers.version>
     <!-- cobertura mínima de linhas do pacote domain (enunciado: >= 70%) -->
     <cobertura.dominio.minima>0.70</cobertura.dominio.minima>
   </properties>
