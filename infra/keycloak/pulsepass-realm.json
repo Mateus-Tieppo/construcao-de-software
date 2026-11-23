@@ -1,0 +1,142 @@
+{
+  "realm": "pulsepass",
+  "enabled": true,
+  "displayName": "PulsePass",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "loginWithEmailAllowed": true,
+  "resetPasswordAllowed": false,
+  "sslRequired": "none",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 28800,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "cliente",
+        "description": "Comprador de ingressos"
+      },
+      {
+        "name": "organizador",
+        "description": "Organizador de eventos aprovado"
+      },
+      {
+        "name": "operador",
+        "description": "Operador de entrada (validação de QR)"
+      },
+      {
+        "name": "admin",
+        "description": "Administrador da plataforma"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "cliente"
+  ],
+  "clients": [
+    {
+      "clientId": "pulsepass-spa",
+      "name": "PulsePass SPA",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:8080/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080",
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8080/*##http://localhost:5173/*"
+      },
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "id": "b3a1f6a2-0000-4000-8000-000000000001",
+      "username": "cliente",
+      "email": "cliente@pulsepass.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Clara",
+      "lastName": "Cliente",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${PULSEPASS_DEMO_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "cliente"
+      ]
+    },
+    {
+      "id": "b3a1f6a2-0000-4000-8000-000000000002",
+      "username": "organizador",
+      "email": "organizador@pulsepass.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Otávio",
+      "lastName": "Organizador",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${PULSEPASS_DEMO_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "organizador",
+        "cliente"
+      ]
+    },
+    {
+      "id": "b3a1f6a2-0000-4000-8000-000000000003",
+      "username": "operador",
+      "email": "operador@pulsepass.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Olga",
+      "lastName": "Operadora",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${PULSEPASS_DEMO_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operador"
+      ]
+    },
+    {
+      "id": "b3a1f6a2-0000-4000-8000-000000000004",
+      "username": "admin",
+      "email": "admin@pulsepass.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Ana",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${PULSEPASS_DEMO_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin",
+        "cliente"
+      ]
+    }
+  ]
+}
