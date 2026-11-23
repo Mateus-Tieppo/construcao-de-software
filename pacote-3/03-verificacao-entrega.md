@@ -42,7 +42,8 @@
 | Afirmação nos documentos | Conferida contra |
 |---|---|
 | Totais do MVP: 78 feitos, 19 parciais, 6 não iniciados (103 pontos, 22 histórias) | Pontos de cada história somados a partir de `pacote-1/03-backlog-story-mapping.md` |
-| 46 testes unitários e 12 de integração passando | Logs dos jobs 2 e 3 da CI no PR #3 |
+| 46 testes unitários e 12 de integração passando; cobertura de domínio 96,9% / 100% / 91,7% | Logs dos jobs 2 e 3 das execuções 45284290380 e 45285399971 |
+| *Smoke* ponta a ponta verde no Compose | Log do job 4 da execução 45284290380 (`SMOKE OK`) |
 | Falha inicial do Testcontainers com Docker 29 e correção para 1.21.4 | Primeira execução da CI no PR #3 e commit `fix(ci)` |
 | `develop` criada em 23/11/2026 | `git ls-remote` do repositório |
 | Proteção de branch "não verificada" | Nenhuma configuração foi alterada nesta entrega |

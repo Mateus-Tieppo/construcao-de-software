@@ -105,17 +105,25 @@ Os serviços de domínio não publicam portas no host: só o Nginx da SPA, o Key
 
 ## 1.6 Evidências de verificação
 
-Execução da CI no Pull Request #3: https://github.com/Mateus-Tieppo/construcao-de-software/actions/runs/RUN_ID
+Execução completa e verde da CI no Pull Request #3 (23/11/2026): https://github.com/Mateus-Tieppo/construcao-de-software/actions/runs/45284290380. A execução seguinte (https://github.com/Mateus-Tieppo/construcao-de-software/actions/runs/45285399971), com o mesmo código e a documentação, passou a imprimir os percentuais de cobertura no log.
 
 | Job da CI | O que comprova | Resultado |
 |---|---|---|
-| 1 · lint + segredos | Checkstyle no backend (`config/checkstyle.xml`) e gitleaks no histórico | RESULTADO_LINT |
-| 1b · SPA | ESLint, TypeScript estrito, Vitest e build de produção | RESULTADO_SPA |
-| 2 · unitários + cobertura | Testes da FSM, regras de reserva, Idempotency-Key, QR e simulador; JaCoCo falha o build se a cobertura de linhas do pacote `dominio` ficar abaixo de 70% | RESULTADO_UNIT |
-| 3 · integração | Testcontainers reais de PostgreSQL 16 e Kafka: 20 compradores concorrentes no mesmo assento (só 1 vence), reserva tudo ou nada, confirmação fora do prazo recusada, expiração devolvendo assentos e `ReservaExpirada` lido do Kafka; Idempotency-Key ponta a ponta no Checkout; `PagamentoConfirmado` entregue duas vezes gera um único ingresso, PDF válido e QR que libera uma vez só | RESULTADO_IT |
-| 4 · build + smoke do Compose | Sobe o `docker-compose.yml` inteiro e executa `scripts/smoke.sh`: login no Keycloak, catálogo, 400 sem Idempotency-Key, replay da mesma chave, 409 no mesmo assento, pagamento, ingresso emitido via Kafka, PDF, QR liberado e depois "já utilizado", 403 para cliente no endpoint do operador | RESULTADO_SMOKE |
+| 1 · lint + segredos | Checkstyle no backend (`config/checkstyle.xml`) e gitleaks no histórico | Sucesso |
+| 1b · SPA | ESLint, TypeScript estrito, Vitest e build de produção | Sucesso (4 testes Vitest) |
+| 2 · unitários + cobertura | Testes da FSM, regras de reserva, Idempotency-Key, QR e simulador; JaCoCo falha o build se a cobertura de linhas do pacote `dominio` ficar abaixo de 70% | Sucesso (46 testes) |
+| 3 · integração | Testcontainers reais de PostgreSQL 16 e Kafka: 20 compradores concorrentes no mesmo assento (só 1 vence), reserva tudo ou nada, confirmação fora do prazo recusada, expiração devolvendo assentos e `ReservaExpirada` lido do Kafka; Idempotency-Key ponta a ponta no Checkout; `PagamentoConfirmado` entregue duas vezes gera um único ingresso, PDF válido e QR que libera uma vez só | Sucesso (12 testes em 3 classes) |
+| 4 · build + smoke do Compose | Sobe o `docker-compose.yml` inteiro e executa `scripts/smoke.sh`: login no Keycloak, catálogo, 400 sem Idempotency-Key, replay da mesma chave, 409 no mesmo assento, pagamento, ingresso emitido via Kafka, PDF, QR liberado e depois "já utilizado", 403 para cliente no endpoint do operador | Sucesso (`SMOKE OK`) |
 
-Cobertura de linhas do pacote `dominio` medida na CI: COBERTURA.
+Cobertura do pacote `dominio` medida pelo JaCoCo na CI (testes unitários):
+
+| Serviço | Linhas | Ramos |
+|---|---|---|
+| checkout-service (FSM do pedido, Idempotency-Key) | 96,9% | 97,8% |
+| inventory-service (reserva, assentos, evento) | 100,0% | 98,0% |
+| ticket-service (QR, assinatura, validação) | 91,7% | 94,4% |
+
+Trecho do log do *smoke* no *runner*: login → catálogo → 400 sem chave → pedido `RESERVADO` → replay com a mesma chave → 409 no mesmo assento → `PAGO` → ingresso `EMITIDO` → PDF → `1a leitura=LIBERADO 2a leitura=JA_UTILIZADO` → 403 para cliente → `SMOKE OK`.
 
 **Limites desta evidência.** A CI roda em um *runner* do GitHub, não no notebook de referência do Pacote 1; não medimos desempenho nem rodamos testes de carga. ArchUnit, PIT (mutação), varredura de imagens e a revisão automática por IA continuam planejados (Pacote 2, seção 4.3) e não foram configurados.
 
