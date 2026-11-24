@@ -1,0 +1,125 @@
+# CI do PulsePass (enunciado: linters, testes e compilação a cada Pull Request ou merge na develop; US33).
+# O merge de um PR em develop gera um push em develop, por isso os dois gatilhos (ADR-006).
+name: ci
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: 1 · lint + segredos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - name: Checkstyle (backend)
+        run: mvn -B -ntp checkstyle:check
+      - name: Varredura de segredos (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  frontend:
+    name: 1b · SPA (lint, tipos, testes, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  unit:
+    name: 2 · unitários + cobertura de domínio >= 70%
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - name: Testes unitários e JaCoCo (check no pacote dominio)
+        run: mvn -B -ntp test
+      - name: Resumo da cobertura de domínio
+        if: always()
+        run: |
+          echo "## Cobertura (JaCoCo, linhas)" >> "$GITHUB_STEP_SUMMARY"
+          for f in services/*/target/site/jacoco/jacoco.csv; do
+            [ -f "$f" ] || continue
+            svc=$(echo "$f" | cut -d/ -f2)
+            awk -F, -v s="$svc" 'NR>1 && $2 ~ /dominio/ {m+=$8; c+=$9; bm+=$6; bc+=$7} END {if (m+c>0) printf "- %s (dominio): linhas %.1f%%, ramos %.1f%%\n", s, 100*c/(m+c), (bm+bc>0 ? 100*bc/(bm+bc) : 100)}' "$f" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relatorios-unitarios
+          path: |
+            services/*/target/site/jacoco/
+            services/*/target/surefire-reports/
+          if-no-files-found: ignore
+
+  integration:
+    name: 3 · integração (Testcontainers PostgreSQL + Kafka)
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - name: Testes de integração (failsafe, *IT)
+        run: mvn -B -ntp verify -Dtest=NONE -Dsurefire.failIfNoSpecifiedTests=false
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relatorios-integracao
+          path: services/*/target/failsafe-reports/
+          if-no-files-found: ignore
+
+  compose-smoke:
+    name: 4 · build + smoke do docker compose
+    needs: [integration, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - name: Compilar os serviços
+        run: mvn -B -ntp -DskipTests package
+      - name: Gerar .env de teste (senhas aleatórias, nada versionado)
+        run: |
+          cp .env.example .env
+          for v in POSTGRES_PASSWORD APP_DB_PASSWORD KEYCLOAK_ADMIN_PASSWORD PULSEPASS_DEMO_PASSWORD GRAFANA_ADMIN_PASSWORD; do
+            sed -i "s/^$v=.*/$v=ci$(openssl rand -hex 12)/" .env
+          done
+      - name: Subir o ambiente completo
+        run: docker compose up -d --build --wait --wait-timeout 420
+      - name: Smoke ponta a ponta
+        run: |
+          set -a; . ./.env; set +a
+          ./scripts/smoke.sh
+      - name: Logs em caso de falha
+        if: failure()
+        run: |
+          docker compose ps -a
+          docker compose logs --no-color --tail=200
+      - name: Derrubar
+        if: always()
+        run: docker compose down -v

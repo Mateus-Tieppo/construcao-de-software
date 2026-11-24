@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: payment-simulator
+server:
+  port: ${PORT:8090}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+simulador:
+  atraso-ms: ${SIMULADOR_ATRASO_MS:0}

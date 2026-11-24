@@ -1,0 +1,255 @@
+# PulsePass: ambiente completo (enunciado; US32; Pacote 2, documento 4, seção 4.4).
+# Subida: cp .env.example .env && mvn -DskipTests package && docker compose up -d --build --wait
+name: pulsepass
+
+x-servico-java: &servico-java
+  restart: unless-stopped
+  mem_limit: 512m
+  networks: [backend, data]
+  healthcheck:
+    test: ["CMD-SHELL", "wget -qO- http://localhost:$${PORT}/actuator/health/readiness | grep -q UP"]
+    interval: 10s
+    timeout: 5s
+    retries: 18
+    start_period: 40s
+
+x-ambiente-java: &ambiente-java
+  KAFKA_BOOTSTRAP: kafka:9092
+  JWK_SET_URI: http://keycloak:8080/realms/pulsepass/protocol/openid-connect/certs
+  DB_PASSWORD: ${APP_DB_PASSWORD}
+
+services:
+  postgres:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./infra/postgres:/docker-entrypoint-initdb.d:ro
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis-data:/data]
+    networks: [data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  kafka:
+    image: apache/kafka:3.8.0
+    mem_limit: 1g
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    volumes: [kafka-data:/var/lib/kafka/data]
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+
+  kafka-init:
+    image: apache/kafka:3.8.0
+    entrypoint: ["/bin/bash", "/scripts/criar-topicos.sh"]
+    environment:
+      KAFKA_BOOTSTRAP: kafka:9092
+    volumes: [./infra/kafka:/scripts:ro]
+    networks: [data]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "no"
+
+  kafka-ui:
+    image: kafbat/kafka-ui:v1.0.0
+    environment:
+      KAFKA_CLUSTERS_0_NAME: pulsepass
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports: ["8089:8080"]
+    networks: [data, ops]
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--import-realm", "--health-enabled=true"]
+    mem_limit: 768m
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak_app
+      KC_DB_PASSWORD: ${APP_DB_PASSWORD}
+      KC_HOSTNAME: http://localhost:8180
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"
+      PULSEPASS_DEMO_PASSWORD: ${PULSEPASS_DEMO_PASSWORD}
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+    ports: ["8180:8080"]
+    networks: [backend, data]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  payment-simulator:
+    build: { context: ./services, args: { SERVICO: payment-simulator } }
+    environment:
+      PORT: 8090
+    networks: [backend]
+    mem_limit: 384m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8090/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+
+  inventory-service:
+    <<: *servico-java
+    build: { context: ./services, args: { SERVICO: inventory-service } }
+    environment:
+      <<: *ambiente-java
+      PORT: 8081
+      DB_URL: jdbc:postgresql://postgres:5432/inv
+      DB_USER: inv_app
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
+      keycloak: { condition: service_healthy }
+
+  checkout-service:
+    <<: *servico-java
+    build: { context: ./services, args: { SERVICO: checkout-service } }
+    environment:
+      <<: *ambiente-java
+      PORT: 8082
+      DB_URL: jdbc:postgresql://postgres:5432/chk
+      DB_USER: chk_app
+      INVENTARIO_URL: http://inventory-service:8081
+      PAGAMENTO_URL: http://payment-simulator:8090
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
+      keycloak: { condition: service_healthy }
+      inventory-service: { condition: service_healthy }
+      payment-simulator: { condition: service_healthy }
+
+  ticket-service:
+    <<: *servico-java
+    build: { context: ./services, args: { SERVICO: ticket-service } }
+    environment:
+      <<: *ambiente-java
+      PORT: 8083
+      DB_URL: jdbc:postgresql://postgres:5432/tkt
+      DB_USER: tkt_app
+      INVENTARIO_URL: http://inventory-service:8081
+      PDF_DIR: /dados/ingressos
+      QR_CHAVE_PRIVADA: ${QR_CHAVE_PRIVADA:-}
+      QR_CHAVE_PUBLICA: ${QR_CHAVE_PUBLICA:-}
+    volumes: [ticket-pdfs:/dados/ingressos]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka-init: { condition: service_completed_successfully }
+      keycloak: { condition: service_healthy }
+
+  api-gateway:
+    build: { context: ./services, args: { SERVICO: api-gateway } }
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      PORT: 8080
+      REDIS_HOST: redis
+      JWK_SET_URI: http://keycloak:8080/realms/pulsepass/protocol/openid-connect/certs
+      INVENTARIO_URL: http://inventory-service:8081
+      CHECKOUT_URL: http://checkout-service:8082
+      INGRESSOS_URL: http://ticket-service:8083
+      CORS_ORIGENS: http://localhost:8080,http://localhost:5173
+    networks: [edge, backend, data]
+    depends_on:
+      redis: { condition: service_healthy }
+      inventory-service: { condition: service_healthy }
+      checkout-service: { condition: service_healthy }
+      ticket-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+
+  frontend:
+    build: { context: ./frontend }
+    ports: ["8080:80"]
+    networks: [edge]
+    depends_on:
+      api-gateway: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    networks: [ops, backend]
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    networks: [ops]
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+
+networks:
+  edge: {}
+  backend: {}
+  data: {}
+  ops: {}
+
+volumes:
+  pg-data: {}
+  redis-data: {}
+  kafka-data: {}
+  ticket-pdfs: {}
+  prom-data: {}
+  grafana-data: {}

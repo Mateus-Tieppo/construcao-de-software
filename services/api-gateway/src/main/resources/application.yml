@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:8180/realms/pulsepass/protocol/openid-connect/certs}
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: ${CORS_ORIGENS:http://localhost:5173,http://localhost:8080}
+            allowed-methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowed-headers: ["*"]
+            exposed-headers: [Idempotent-Replayed]
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            key-resolver: "#{@chaveUsuarioOuIp}"
+            redis-rate-limiter.replenishRate: ${RATE_LIMIT_POR_SEGUNDO:20}
+            redis-rate-limiter.burstCapacity: ${RATE_LIMIT_RAJADA:40}
+      routes:
+        - id: inventario
+          uri: ${INVENTARIO_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/eventos/**,/api/organizador/**
+          filters:
+            - StripPrefix=1
+        - id: checkout
+          uri: ${CHECKOUT_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/pedidos/**
+          filters:
+            - StripPrefix=1
+        - id: ingressos
+          uri: ${INGRESSOS_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/ingressos/**,/api/validacoes/**
+          filters:
+            - StripPrefix=1
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,gateway
