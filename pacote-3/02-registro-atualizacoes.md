@@ -13,7 +13,7 @@ A documentação foi atualizada onde o código mostrou algo diferente do planeja
 |---|---|---|
 | 1. Processo de desenvolvimento com IA | Nova evidência de como o Pacote 3 foi produzido: spec, *inner loop* com Claude Code, CI como sensor determinístico (incluindo a falha do Testcontainers com Docker 29 e a correção), revisão humana pelo PR; lista do que do *harness* já está ativo e do que continua planejado | 1.10 (nova) |
 | 2. Documento de Visão | Versão 1.1; situação do produto no checkpoint por perfil de usuário. Escopo e critérios de sucesso sem mudança | 2.12 (nova) |
-| 3. Backlog / Story Mapping | Situação de cada uma das 22 histórias do MVP com a evidência; totais 78 feitos, 19 parciais, 6 não iniciados (de 103 pontos) | 3.6 (nova) |
+| 3. Backlog / Story Mapping | Situação de cada uma das 22 histórias do MVP com a evidência; totais 55 feitos, 42 parciais, 6 não iniciados (de 103 pontos), classificados critério a critério | 3.6 (nova) |
 | 4. Requisitos não-funcionais | Situação de verificação de cada RNF: verificado em CI, implementado sem teste dedicado ou pendente | 4.10 (nova) |
 | 5. Mockups e mapa de navegação | Rotas da SPA implementada, tela correspondente de cada mockup e diferenças | 5.7 (nova) |
 

@@ -14,7 +14,7 @@ O enunciado define o Pacote 3 como **[Enunciado]**:
 | Item | Onde está |
 |---|---|
 | Repositório | https://github.com/Mateus-Tieppo/construcao-de-software |
-| Código deste checkpoint | branch `feature/pacote-3-checkpoint`, integrada à `develop` pelo Pull Request #3 (https://github.com/Mateus-Tieppo/construcao-de-software/pull/3) |
+| Código deste checkpoint | branch `feature/pacote-3-checkpoint` (https://github.com/Mateus-Tieppo/construcao-de-software/tree/feature/pacote-3-checkpoint), em revisão no Pull Request #3 para a `develop` (https://github.com/Mateus-Tieppo/construcao-de-software/pull/3). A `main` só recebe o código depois da aprovação do PR por outro integrante, como define o GCS do grupo |
 | Documentação atualizada | `pacote-3/documentacao/pacote-1/` e `pacote-3/documentacao/pacote-2/`; o que mudou em cada documento está em `pacote-3/02-registro-atualizacoes.md` |
 | PDF consolidado | `pacote-3/Pacote3_Grupo9.pdf` |
 
@@ -75,11 +75,11 @@ O Pacote 1 definiu a release **MVP = Pacote 3** com 22 histórias (103 pontos). 
 
 | Situação | Histórias | Pontos |
 |---|---|---|
-| **Feitas** (código + teste automatizado ou *smoke*) | US01, US02, US14, US15, US17, US18, US19, US21, US22, US23, US25, US26, US29, US32, US33 | 78 |
-| **Parciais** | US03 (refresh feito pelo `keycloak-js`, sem o BFF do IAM), US09 a US12 (API pronta e testada; telas do organizador pendentes) | 19 |
+| **Feitas** (todos os critérios de aceitação atendidos, com teste automatizado ou *smoke*) | US02, US17, US18, US19, US21, US22, US23, US26, US32, US33 | 55 |
+| **Parciais** (fluxo principal pronto, falta algum critério) | US01 (falta registrar falha de login na auditoria), US03 (refresh pelo `keycloak-js`, sem o BFF do IAM), US09 a US12 (API pronta; telas do organizador pendentes), US14 (falta cache do catálogo), US15 (falta contagem regressiva para vendas não abertas), US25 (falta DLQ e alerta após 3 falhas do PDF), US29 (falta negar operador não vinculado ao evento) | 42 |
 | **Não iniciadas** | US05, US06 (credenciamento de organizador, dependem do IAM Service) | 6 |
 
-Os 6 pontos não iniciados e as telas do organizador entram no topo do backlog do Pacote 4, junto com a release R2. A situação de cada história está no backlog atualizado (`documentacao/pacote-1/03-backlog-story-mapping.md`, seção 3.6).
+A classificação foi feita critério a critério contra o backlog do Pacote 1: uma história só conta como feita se todos os seus critérios de aceitação estão atendidos. As parciais e não iniciadas entram no topo do backlog do Pacote 4, antes da release R2. A situação de cada história está no backlog atualizado (`documentacao/pacote-1/03-backlog-story-mapping.md`, seção 3.6).
 
 ## 1.5 Como executar
 
@@ -105,15 +105,15 @@ Os serviços de domínio não publicam portas no host: só o Nginx da SPA, o Key
 
 ## 1.6 Evidências de verificação
 
-Execução completa e verde da CI no Pull Request #3 (23/11/2026): https://github.com/Mateus-Tieppo/construcao-de-software/actions/runs/45284290380. A execução seguinte (https://github.com/Mateus-Tieppo/construcao-de-software/actions/runs/45285399971), com o mesmo código e a documentação, passou a imprimir os percentuais de cobertura no log.
+Execução completa e verde da CI no Pull Request #3, no commit final de código (23/11/2026): https://github.com/Mateus-Tieppo/construcao-de-software/actions/runs/45293138282. Os percentuais de cobertura e o roteiro do *smoke* abaixo foram copiados dos logs dessa execução.
 
 | Job da CI | O que comprova | Resultado |
 |---|---|---|
 | 1 · lint + segredos | Checkstyle no backend (`config/checkstyle.xml`) e gitleaks no histórico | Sucesso |
 | 1b · SPA | ESLint, TypeScript estrito, Vitest e build de produção | Sucesso (4 testes Vitest) |
 | 2 · unitários + cobertura | Testes da FSM, regras de reserva, Idempotency-Key, QR e simulador; JaCoCo falha o build se a cobertura de linhas do pacote `dominio` ficar abaixo de 70% | Sucesso (46 testes) |
-| 3 · integração | Testcontainers reais de PostgreSQL 16 e Kafka: 20 compradores concorrentes no mesmo assento (só 1 vence), reserva tudo ou nada, confirmação fora do prazo recusada, expiração devolvendo assentos e `ReservaExpirada` lido do Kafka; Idempotency-Key ponta a ponta no Checkout; `PagamentoConfirmado` entregue duas vezes gera um único ingresso, PDF válido e QR que libera uma vez só | Sucesso (12 testes em 3 classes) |
-| 4 · build + smoke do Compose | Sobe o `docker-compose.yml` inteiro e executa `scripts/smoke.sh`: login no Keycloak, catálogo, 400 sem Idempotency-Key, replay da mesma chave, 409 no mesmo assento, pagamento, ingresso emitido via Kafka, PDF, QR liberado e depois "já utilizado", 403 para cliente no endpoint do operador | Sucesso (`SMOKE OK`) |
+| 3 · integração | Testcontainers reais de PostgreSQL 16 e Kafka: 100 compradores concorrentes no mesmo assento (só 1 vence), reserva tudo ou nada, confirmação fora do prazo recusada, expiração devolvendo assentos e `ReservaExpirada` lido do Kafka; Idempotency-Key ponta a ponta no Checkout; `PagamentoConfirmado` entregue duas vezes gera um único ingresso, PDF válido e QR que libera uma vez só | Sucesso (12 testes em 3 classes) |
+| 4 · build + smoke do Compose | Sobe o `docker-compose.yml` inteiro e executa `scripts/smoke.sh`: login no Keycloak, catálogo, 400 sem Idempotency-Key, replay da mesma chave, 409 no mesmo assento, pagamento, ingresso emitido via Kafka, papel padrão `cliente` e política de senha do realm, catálogo, 400 sem Idempotency-Key, replay da mesma chave, 409 no mesmo assento, pagamento, ingresso emitido via Kafka, PDF, 403 para outro usuário baixar o ingresso, QR liberado e depois "já utilizado" com data/hora, 403 para cliente no endpoint do operador | Sucesso (`SMOKE OK`) |
 
 Cobertura do pacote `dominio` medida pelo JaCoCo na CI (testes unitários):
 
@@ -123,7 +123,7 @@ Cobertura do pacote `dominio` medida pelo JaCoCo na CI (testes unitários):
 | inventory-service (reserva, assentos, evento) | 100,0% | 98,0% |
 | ticket-service (QR, assinatura, validação) | 91,7% | 94,4% |
 
-Trecho do log do *smoke* no *runner*: login → catálogo → 400 sem chave → pedido `RESERVADO` → replay com a mesma chave → 409 no mesmo assento → `PAGO` → ingresso `EMITIDO` → PDF → `1a leitura=LIBERADO 2a leitura=JA_UTILIZADO` → 403 para cliente → `SMOKE OK`.
+Trecho do log do *smoke* no *runner*: login → papel padrão `cliente` e política `length(8) and digits(1) and regexPattern(.*[A-Za-z].*) and notUsername` → catálogo → 400 sem chave → pedido `RESERVADO` → replay com a mesma chave → 409 no mesmo assento → `PAGO` → ingresso `EMITIDO` → PDF → 403 para outro usuário → `1a leitura=LIBERADO 2a leitura=JA_UTILIZADO` → 403 para cliente no endpoint do operador → `SMOKE OK`.
 
 **Limites desta evidência.** A CI roda em um *runner* do GitHub, não no notebook de referência do Pacote 1; não medimos desempenho nem rodamos testes de carga. ArchUnit, PIT (mutação), varredura de imagens e a revisão automática por IA continuam planejados (Pacote 2, seção 4.3) e não foram configurados.
 
@@ -147,4 +147,5 @@ Trecho do log do *smoke* no *runner*: login → catálogo → 400 sem chave → 
 3. Telemetry Service, ingestão de navegação e painéis (US34 a US36).
 4. Telas do organizador e do admin na SPA; leitura do QR por câmera.
 5. Resilience4j e reconciliação no Checkout; cache do catálogo no Redis.
-6. ArchUnit, PIT e teste de carga com k6 (bônus do enunciado).
+6. Critérios que deixaram histórias do MVP parciais: auditoria de falha de login (US01), contagem regressiva de abertura de vendas (US15), DLQ e alerta do PDF (US25), vínculo operador × evento (US29).
+7. ArchUnit, PIT e teste de carga com k6 (bônus do enunciado).

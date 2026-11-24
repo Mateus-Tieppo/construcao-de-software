@@ -282,8 +282,8 @@ stateDiagram-v2
 
 | História | Pts | Situação | Evidência |
 |---|---|---|---|
-| US01 Login via Keycloak | 5 | Feita | Realm versionado; SPA com OIDC + PKCE; *smoke* obtém token e chama a API |
-| US02 Cadastro de comprador | 3 | Feita | Auto-cadastro do Keycloak com papel padrão `cliente` |
+| US01 Login via Keycloak | 5 | Parcial | Realm versionado; SPA com OIDC + PKCE; token RS256 de 5 min; rotas protegidas exigem JWT. Falta registrar a falha de login na auditoria (depende do IAM, US08) |
+| US02 Cadastro de comprador | 3 | Feita | Auto-cadastro do Keycloak; o *smoke* confere o papel padrão `cliente` e a política de senha (8+ caracteres, letra e número); e-mail repetido é recusado pelo Keycloak |
 | US03 Refresh token | 3 | Parcial | Renovação feita pelo `keycloak-js` na SPA; refresh no Redis via BFF do IAM fica para o Pacote 4 |
 | US05 Solicitar credenciamento | 3 | Não iniciada | Depende do IAM Service |
 | US06 Aprovar organizador | 3 | Não iniciada | Depende do IAM Service |
@@ -291,18 +291,18 @@ stateDiagram-v2
 | US10 Criar lotes | 3 | Parcial | Lote criado junto com o setor; edição (US13) é R2 |
 | US11 Mapa de assentos | 8 | Parcial | Mapa gerado por filas × assentos na criação do setor; editor visual pendente |
 | US12 Publicar vendas | 2 | Parcial | `POST /organizador/eventos/{id}/publicacao` grava `EventoPublicado` na Outbox; encerrar pendente |
-| US14 Listar eventos | 3 | Feita | `GET /eventos` + tela de catálogo |
-| US15 Detalhe do evento | 2 | Feita | `GET /eventos/{id}` + tela |
+| US14 Listar eventos | 3 | Parcial | `GET /eventos` + tela com nome, data, cidade, menor preço e "Esgotado". Falta o cache do RNF09 |
+| US15 Detalhe do evento | 2 | Parcial | `GET /eventos/{id}` + tela com lotes e preços. Falta a contagem regressiva para vendas ainda não abertas |
 | US17 Ver mapa de assentos | 5 | Feita | `GET /eventos/{id}/setores/{s}/assentos` + mapa clicável |
-| US18 Reservar assento atomicamente | 8 | Feita | Teste com 20 compradores concorrentes; teste tudo ou nada; 409 no *smoke* |
+| US18 Reservar assento atomicamente | 8 | Feita | Teste com 100 compradores concorrentes (1 vence); tudo ou nada; limite de 6; 409 no *smoke*. O cenário de 1.000 compradores do critério depende do teste de carga (bônus) |
 | US19 Expirar reserva em 10 min | 5 | Feita | Worker com `SKIP LOCKED`; teste de expiração com leitura do evento no Kafka |
 | US21 Pedido com FSM | 8 | Feita | Testes unitários de todas as transições; *gate* de cobertura no domínio |
 | US22 Pagar com Idempotency-Key | 5 | Feita | Testes de integração (replay, 422, 400) e *smoke* |
 | US23 Outbox → Kafka | 8 | Feita | Outbox em todas as transições; relay com *advisory lock*; evento lido do Kafka no teste |
-| US25 Emitir ingresso PDF + QR | 8 | Feita | Teste com entrega duplicada gera um ingresso; PDF válido; QR assinado |
-| US26 Meus ingressos | 3 | Feita | `GET /ingressos`, download do PDF, tela |
-| US29 Validar QR Code | 5 | Feita | Uso único testado; tela do operador; vínculo operador × evento pendente |
+| US25 Emitir ingresso PDF + QR | 8 | Parcial | Entrega duplicada gera um ingresso; PDF com evento, assento, titular, carimbo de tempo e QR assinado. Após 3 falhas o job fica `FALHOU`, mas ainda sem DLQ e alerta |
+| US26 Meus ingressos | 3 | Feita | Lista com QR Code e "Baixar PDF"; o *smoke* confere 403 quando outro usuário tenta baixar o ingresso |
+| US29 Validar QR Code | 5 | Parcial | Liberado, "já utilizado em data/hora" e inválido testados; tela do operador. Falta negar (403) operador não vinculado ao evento |
 | US32 Docker Compose completo | 5 | Feita | Job `compose-smoke` da CI sobe o ambiente inteiro |
 | US33 CI no GitHub Actions | 5 | Feita | `.github/workflows/ci.yml` rodando no PR #3 |
 
-**Totais do MVP (103 pontos):** 78 feitos, 19 parciais e 6 não iniciados. As histórias parciais e não iniciadas entram no topo do Pacote 4, antes da release R2. Adiantamos da R2 a recusa de pagamento voltando o pedido a Reservado (parte da US24) e o cancelamento de reserva pela API (parte da US20b).
+**Totais do MVP (103 pontos):** 55 feitos, 42 parciais e 6 não iniciados. Uma história só conta como feita quando todos os seus critérios de aceitação estão atendidos. As histórias parciais e não iniciadas entram no topo do Pacote 4, antes da release R2. Adiantamos da R2 a recusa de pagamento voltando o pedido a Reservado (parte da US24) e o cancelamento de reserva pela API (parte da US20b).

@@ -107,7 +107,7 @@ As metas desta seção continuam valendo. A tabela mostra o que já tem verifica
 
 | RNF | Situação | Como está verificado hoje |
 |---|---|---|
-| RNF01, RNF02 | Verificado em CI | Teste de integração com 20 reservas concorrentes no mesmo assento (1 vence) e reserva multi-assento tudo ou nada; `CHECK` no banco impede assento reservado sem reserva |
+| RNF01, RNF02 | Verificado em CI | Teste de integração com 100 reservas concorrentes no mesmo assento (1 vence) e reserva multi-assento tudo ou nada; `CHECK` no banco impede assento reservado sem reserva |
 | RNF03 | Implementado, verificado em CI sem medir a janela de 600 a 605 s | Worker de 1 s; teste força a expiração e confere assento devolvido e `ReservaExpirada` no Kafka |
 | RNF04 | Verificado em CI | Testes unitários de todas as transições; transições aplicadas com `UPDATE ... WHERE estado = ?` |
 | RNF05 | Verificado em CI | 400 sem chave, replay com cabeçalho `Idempotent-Replayed`, 422 para corpo diferente |

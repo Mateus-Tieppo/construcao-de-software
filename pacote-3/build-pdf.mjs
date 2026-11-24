@@ -102,7 +102,8 @@ p:has(img) { break-inside: avoid; } img { max-width: 100%; max-height: 200mm; bo
  <h2>Plataforma Distribuída de Bilhetagem, Reserva e Acesso para Megaeventos</h2>
  <h2><b>Pacote 3: Checkpoint do Desenvolvimento</b></h2>
  <div class="grp"><b>Grupo 9</b><br>Gabriel Gerhardt de Marque<br>Mateus Granja de Andrade Madalosso Tieppo<br>Filipe Tesche Roman</div>
- <div class="inst" style="margin-top:12mm">Repositório: <b>https://github.com/Mateus-Tieppo/construcao-de-software</b> (código na raiz; documentação em <code>pacote-3/</code>)</div>
+ <div class="inst" style="margin-top:12mm">Repositório: <b>https://github.com/Mateus-Tieppo/construcao-de-software</b></div>
+ <div class="inst" style="margin-top:3mm">Código deste checkpoint: <b>https://github.com/Mateus-Tieppo/construcao-de-software/tree/feature/pacote-3-checkpoint</b><br>(Pull Request #3 para a <code>develop</code>; documentação em <code>pacote-3/</code>)</div>
  <div class="inst" style="margin-top:8mm">Porto Alegre, 23 de novembro de 2026</div>
 </div>
 <div class="sumario"><h1>Sumário</h1>
